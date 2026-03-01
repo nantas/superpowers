@@ -23,6 +23,8 @@ Dispatch superpowers:code-reviewer subagent to catch issues before they cascade.
 
 ## How to Request
 
+Use runtime adapter actions from `../_shared/runtime-compat.md` for worker orchestration.
+
 **1. Get git SHAs:**
 ```bash
 BASE_SHA=$(git rev-parse HEAD~1)  # or origin/main
@@ -31,7 +33,7 @@ HEAD_SHA=$(git rev-parse HEAD)
 
 **2. Dispatch code-reviewer subagent:**
 
-Use Task tool with superpowers:code-reviewer type, fill template at `code-reviewer.md`
+Use `spawn_worker` with `superpowers:code-reviewer`, then `wait_worker` and `close_worker`; fill template at `code-reviewer.md`
 
 **Placeholders:**
 - `{WHAT_WAS_IMPLEMENTED}` - What you just built

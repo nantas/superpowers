@@ -51,6 +51,20 @@ Codex has native skill discovery — it scans `~/.agents/skills/` at startup, pa
 
 The `using-superpowers` skill is discovered automatically and enforces skill usage discipline — no additional configuration needed.
 
+## Tool Mapping
+
+Superpowers skills should use capability-based adapter actions, then map to Codex tools:
+
+| Adapter action | Codex tool(s) |
+| --- | --- |
+| `track_tasks` | `update_plan` |
+| `spawn_worker` / dispatch subagent | `spawn_agent` |
+| `message_worker` | `send_input` |
+| `wait_worker` | `wait` |
+| `close_worker` | `close_agent` |
+
+Compatibility note: prefer capability detection over hardcoding runtime names or tool names in skill instructions.
+
 ## Usage
 
 Skills are discovered automatically. Codex activates them when:
@@ -113,6 +127,20 @@ Optionally delete the clone: `rm -rf ~/.codex/superpowers` (Windows: `Remove-Ite
 ### Windows junction issues
 
 Junctions normally work without special permissions. If creation fails, try running PowerShell as administrator.
+
+## Testing
+
+Run Codex compatibility checks after skill/doc changes:
+
+```bash
+cd ~/.codex/superpowers
+./tests/codex/run-tests.sh
+```
+
+The test covers:
+- static scan for legacy hardcoded tool names in active skills/docs
+- Codex runtime capability probe (`update_plan`, `spawn_agent`, `send_input`, `wait`, `close_agent`)
+- behavior smoke check for runtime adapter terminology
 
 ## Getting Help
 

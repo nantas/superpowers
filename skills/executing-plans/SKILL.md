@@ -11,6 +11,8 @@ Load plan, review critically, execute tasks in batches, report for review betwee
 
 **Core principle:** Batch execution with checkpoints for architect review.
 
+**Runtime adapter:** Use abstract actions from `../_shared/runtime-compat.md` (`track_tasks`, and worker actions when needed).
+
 **Announce at start:** "I'm using the executing-plans skill to implement this plan."
 
 ## The Process
@@ -19,7 +21,7 @@ Load plan, review critically, execute tasks in batches, report for review betwee
 1. Read plan file
 2. Review critically - identify any questions or concerns about the plan
 3. If concerns: Raise them with your human partner before starting
-4. If no concerns: Create TodoWrite and proceed
+4. If no concerns: initialize `track_tasks` and proceed
 
 ### Step 2: Execute Batch
 **Default: First 3 tasks**

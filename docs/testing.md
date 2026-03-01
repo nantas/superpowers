@@ -10,14 +10,50 @@ Testing skills that involve subagents, workflows, and complex interactions requi
 
 ```
 tests/
+├── run-all.sh                             # Unified runner (default: codex + opencode fast suites)
+├── codex/
+│   ├── run-tests.sh
+│   └── test-runtime-compat.sh
 ├── claude-code/
 │   ├── test-helpers.sh                    # Shared test utilities
 │   ├── test-subagent-driven-development-integration.sh
 │   ├── analyze-token-usage.py             # Token analysis tool
-│   └── run-skill-tests.sh                 # Test runner (if exists)
+│   └── run-skill-tests.sh
+├── opencode/
+│   └── run-tests.sh
 ```
 
 ## Running Tests
+
+### Unified Runner (Recommended)
+
+```bash
+./tests/run-all.sh
+```
+
+Default behavior runs fast suites (`codex` + `opencode`).
+
+Include Claude-based suites:
+
+```bash
+./tests/run-all.sh --with-claude
+```
+
+Enable integration variants:
+
+```bash
+./tests/run-all.sh --with-opencode-integration --with-claude --with-claude-integration
+```
+
+### Suite-Specific Runners
+
+```bash
+./tests/codex/run-tests.sh
+./tests/opencode/run-tests.sh
+./tests/claude-code/run-skill-tests.sh
+./tests/skill-triggering/run-all.sh
+./tests/explicit-skill-requests/run-all.sh
+```
 
 ### Integration Tests
 
@@ -56,8 +92,8 @@ The integration test verifies the `subagent-driven-development` skill correctly:
 2. **Execution**: Runs Claude Code in headless mode with the skill
 3. **Verification**: Parses the session transcript (`.jsonl` file) to verify:
    - Skill tool was invoked
-   - Subagents were dispatched (Task tool)
-   - TodoWrite was used for tracking
+   - Worker dispatch was used (`spawn_worker`; Claude transcripts may show `Task`)
+   - Task tracking was used (`track_tasks`; Claude transcripts may use runtime-specific planner tool names)
    - Implementation files were created
    - Tests pass
    - Git commits show proper workflow
@@ -81,7 +117,7 @@ Test 2: Subagents dispatched...
   [PASS] 7 subagents dispatched
 
 Test 3: Task tracking...
-  [PASS] TodoWrite used 5 time(s)
+  [PASS] track_tasks used 5 time(s)
 
 Test 6: Implementation verification...
   [PASS] src/math.js created

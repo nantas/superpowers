@@ -5,9 +5,10 @@ Use this template when dispatching a spec compliance reviewer subagent.
 **Purpose:** Verify implementer built what was requested (nothing more, nothing less)
 
 ```
-Task tool (general-purpose):
+Runtime adapter (`spawn_worker`):
+  role: "spec compliance reviewer"
   description: "Review spec compliance for Task N"
-  prompt: |
+  message: |
     You are reviewing whether an implementation matches its specification.
 
     ## What Was Requested

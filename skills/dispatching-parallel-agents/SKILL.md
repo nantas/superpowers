@@ -11,6 +11,8 @@ When you have multiple unrelated failures (different test files, different subsy
 
 **Core principle:** Dispatch one agent per independent problem domain. Let them work concurrently.
 
+**Runtime adapter:** Use abstract actions from `../_shared/runtime-compat.md` (`spawn_worker`, `message_worker`, `wait_worker`, `close_worker`).
+
 ## When to Use
 
 ```dot
@@ -63,12 +65,12 @@ Each agent gets:
 
 ### 3. Dispatch in Parallel
 
-```typescript
-// In Claude Code / AI environment
-Task("Fix agent-tool-abort.test.ts failures")
-Task("Fix batch-completion-behavior.test.ts failures")
-Task("Fix tool-approval-race-conditions.test.ts failures")
-// All three run concurrently
+```text
+spawn_worker("Fix agent-tool-abort.test.ts failures")
+spawn_worker("Fix batch-completion-behavior.test.ts failures")
+spawn_worker("Fix tool-approval-race-conditions.test.ts failures")
+wait_worker([worker_1, worker_2, worker_3])
+close_worker(worker_1), close_worker(worker_2), close_worker(worker_3)
 ```
 
 ### 4. Review and Integrate

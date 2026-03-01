@@ -249,10 +249,10 @@ Superpowers uses OpenCode's native `skill` tool for skill discovery and loading.
 
 Skills written for Claude Code are automatically adapted for OpenCode. The bootstrap provides mapping instructions:
 
-- `TodoWrite` → `update_plan`
-- `Task` with subagents → OpenCode's `@mention` system
-- `Skill` tool → OpenCode's native `skill` tool
-- File operations → Native OpenCode tools
+- `track_tasks` → `update_plan`
+- `spawn_worker` / dispatch subagent → OpenCode's `@mention` system
+- `load_skill` → OpenCode's native `skill` tool
+- File operations → native OpenCode tools
 
 ## Architecture
 
