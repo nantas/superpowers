@@ -5,3 +5,4 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 bash "$SCRIPT_DIR/test-runtime-compat.sh" "$@"
+bash "$SCRIPT_DIR/test-skill-context-budget.sh"

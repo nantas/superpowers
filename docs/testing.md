@@ -13,7 +13,8 @@ tests/
 ├── run-all.sh                             # Unified runner (default: codex + opencode fast suites)
 ├── codex/
 │   ├── run-tests.sh
-│   └── test-runtime-compat.sh
+│   ├── test-runtime-compat.sh
+│   └── test-skill-context-budget.sh
 ├── claude-code/
 │   ├── test-helpers.sh                    # Shared test utilities
 │   ├── test-subagent-driven-development-integration.sh
@@ -49,6 +50,7 @@ Enable integration variants:
 
 ```bash
 ./tests/codex/run-tests.sh
+./tests/codex/test-skill-context-budget.sh
 ./tests/opencode/run-tests.sh
 ./tests/claude-code/run-skill-tests.sh
 ./tests/skill-triggering/run-all.sh
