@@ -20,6 +20,40 @@ Use capability-based actions from `../_shared/runtime-compat.md`:
 
 Map these actions to your platform-native tools.
 
+## Global Multi-Agent Enforcement Policy (Mandatory)
+
+When work involves a written plan or 2+ potentially independent domains, enforce this policy.
+
+1. Select exactly one orchestrator skill:
+   - same-session plan execution -> `subagent-driven-development`
+   - batch/checkpoint plan execution -> `executing-plans`
+   - independent concurrent domains -> `dispatching-parallel-agents`
+2. Run preflight before first worker spawn or fallback execution:
+   - permissions/locks readiness
+   - dependencies/tooling availability
+   - known-failing exclusions or constraints
+   - branch/worktree readiness
+3. Before any completion claim, invoke `verification-before-completion` and provide fresh verification evidence.
+4. If worker capabilities are incomplete, enter fallback behavior while preserving equivalent checkpoints.
+
+### Mode Declaration (Required Once Per Session)
+
+Declare these modes once before substantial execution:
+- execution mode: `parallel-worker` or `fallback-serial`
+- permission mode: `normal` or `git-write-restricted`
+
+The declaration must match the contract in `../_shared/runtime-compat.md`.
+
+### Routing Decision Table
+
+| Task shape | Worker capability complete? | Permission mode | Required route |
+| --- | --- | --- | --- |
+| Written plan, mostly independent tasks, staying in current session | yes | normal | `subagent-driven-development` + `parallel-worker` |
+| Written plan with batch checkpoints/handoff flow | yes/no | normal | `executing-plans` (`parallel-worker` when worker APIs exist, else `fallback-serial`) |
+| 2+ independent concurrent domains | yes | normal | `dispatching-parallel-agents` + `parallel-worker` |
+| Any of the above with incomplete worker actions | no | normal | keep chosen orchestrator semantics in `fallback-serial` |
+| Any workflow with `.git/*.lock` permission failures on Git metadata writes | yes/no | `git-write-restricted` | continue selected orchestrator; switch Git-write behavior per runtime-compat contract |
+
 # Using Skills
 
 ## The Rule

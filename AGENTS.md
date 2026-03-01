@@ -19,8 +19,18 @@ There is no separate build step; development is mostly Markdown, shell scripts, 
 - `./tests/opencode/run-tests.sh`: Run OpenCode plugin test suite.
 - `./tests/skill-triggering/run-all.sh`: Verify automatic skill triggering behavior.
 - `./tests/explicit-skill-requests/run-all.sh`: Verify explicit skill-request handling.
+- `./.codex/install-local.sh`: Install Codex skills from local source by copying `skills/` into `~/.agents/skills/superpowers`.
+- `./.codex/install-local.sh --repo /abs/path/to/superpowers`: Copy from an explicit local source repo path.
 
 Run from repo root unless a script’s README says otherwise.
+
+## Local Codex Installation Notes
+Use `./.codex/install-local.sh` when developing/testing against a local checkout.
+
+- The installer copies latest skill files from `<repo>/skills` to `~/.agents/skills/superpowers`.
+- It does not create symlinks to the source repository.
+- It replaces the destination directory on each run to keep files fresh.
+- Restart Codex after installation so native skill discovery reloads the updated files.
 
 ## Coding Style & Naming Conventions
 - Bash: use `#!/usr/bin/env bash`, `set -euo pipefail`, and consistently quote variables.

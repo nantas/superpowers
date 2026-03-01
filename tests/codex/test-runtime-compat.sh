@@ -146,7 +146,7 @@ if [ "$INTEGRATION_SKIPPED" = false ]; then
     SMOKE_OUT="$TMP_DIR/smoke.txt"
 
     set +e
-    run_codex_exec "Use superpowers:subagent-driven-development. In one short answer, list the runtime adapter action names used for task tracking and worker orchestration." >"$SMOKE_OUT" 2>&1
+    run_codex_exec "Use superpowers:using-superpowers. In one short answer, list: runtime adapter actions for task tracking and worker orchestration; the three orchestrator route names; execution mode names; permission mode names; and the required completion verification gate skill." >"$SMOKE_OUT" 2>&1
     SMOKE_EXIT=$?
     set -e
 
@@ -163,12 +163,20 @@ if [ "$INTEGRATION_SKIPPED" = false ]; then
             "spawn_worker"
             "wait_worker"
             "close_worker"
+            "subagent-driven-development"
+            "executing-plans"
+            "dispatching-parallel-agents"
+            "parallel-worker"
+            "fallback-serial"
+            "normal"
+            "git-write-restricted"
+            "verification-before-completion"
         )
 
         MISSING=0
         for term in "${REQUIRED_TERMS[@]}"; do
             if ! grep -qi "$term" "$SMOKE_OUT"; then
-                echo "    missing adapter term: $term"
+                echo "    missing term: $term"
                 MISSING=1
             fi
         done
@@ -179,9 +187,9 @@ if [ "$INTEGRATION_SKIPPED" = false ]; then
         fi
 
         if [ "$MISSING" -eq 0 ]; then
-            pass "Model response uses adapter terminology"
+            pass "Model response includes routing, mode, and verification gate terminology"
         else
-            fail "Smoke response missing adapter terms or contains legacy terms"
+            fail "Smoke response missing required policy terms or contains legacy terms"
             sed 's/^/    /' "$SMOKE_OUT"
         fi
     fi

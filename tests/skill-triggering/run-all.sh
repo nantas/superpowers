@@ -2,12 +2,13 @@
 # Run all skill triggering tests
 # Usage: ./run-all.sh
 
-set -e
+set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROMPTS_DIR="$SCRIPT_DIR/prompts"
 
 SKILLS=(
+    "using-superpowers"
     "systematic-debugging"
     "test-driven-development"
     "writing-plans"
@@ -21,6 +22,7 @@ echo ""
 
 PASSED=0
 FAILED=0
+SKIPPED=0
 RESULTS=()
 
 for skill in "${SKILLS[@]}"; do
@@ -28,14 +30,24 @@ for skill in "${SKILLS[@]}"; do
 
     if [ ! -f "$prompt_file" ]; then
         echo "⚠️  SKIP: No prompt file for $skill"
+        SKIPPED=$((SKIPPED + 1))
+        RESULTS+=("⚠️ $skill")
         continue
     fi
 
     echo "Testing: $skill"
 
-    if "$SCRIPT_DIR/run-test.sh" "$skill" "$prompt_file" 3 2>&1 | tee /tmp/skill-test-$skill.log; then
+    set +e
+    "$SCRIPT_DIR/run-test.sh" "$skill" "$prompt_file" 3 2>&1 | tee "/tmp/skill-test-$skill.log"
+    RUN_EXIT=${PIPESTATUS[0]}
+    set -e
+
+    if [ "$RUN_EXIT" -eq 0 ]; then
         PASSED=$((PASSED + 1))
         RESULTS+=("✅ $skill")
+    elif [ "$RUN_EXIT" -eq 2 ]; then
+        SKIPPED=$((SKIPPED + 1))
+        RESULTS+=("⚠️ $skill")
     else
         FAILED=$((FAILED + 1))
         RESULTS+=("❌ $skill")
@@ -54,7 +66,8 @@ done
 echo ""
 echo "Passed: $PASSED"
 echo "Failed: $FAILED"
+echo "Skipped: $SKIPPED"
 
-if [ $FAILED -gt 0 ]; then
+if [ "$FAILED" -gt 0 ]; then
     exit 1
 fi

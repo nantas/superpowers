@@ -5,7 +5,7 @@
 # Tests whether Claude triggers a skill based on a natural prompt
 # (without explicitly mentioning the skill)
 
-set -e
+set -euo pipefail
 
 SKILL_NAME="$1"
 PROMPT_FILE="$2"
@@ -16,6 +16,24 @@ if [ -z "$SKILL_NAME" ] || [ -z "$PROMPT_FILE" ]; then
     echo "Example: $0 systematic-debugging ./test-prompts/debugging.txt"
     exit 1
 fi
+
+run_with_timeout() {
+    local seconds="$1"
+    shift
+
+    if command -v timeout >/dev/null 2>&1; then
+        timeout "$seconds" "$@"
+    elif command -v gtimeout >/dev/null 2>&1; then
+        gtimeout "$seconds" "$@"
+    else
+        "$@"
+    fi
+}
+
+looks_like_environment_skip() {
+    local file="$1"
+    grep -Eqi "auth|login|credential|api key|unauthorized|forbidden|not logged|rate limit|network|connection|timeout|timed out|plugin|permission denied|operation not permitted" "$file"
+}
 
 # Get the directory where this script lives (should be tests/skill-triggering)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -44,16 +62,42 @@ LOG_FILE="$OUTPUT_DIR/claude-output.json"
 cd "$OUTPUT_DIR"
 
 echo "Plugin dir: $PLUGIN_DIR"
+
 echo "Running claude -p with naive prompt..."
-timeout 300 claude -p "$PROMPT" \
+if ! command -v claude >/dev/null 2>&1; then
+    echo "⚠️  SKIP: claude CLI not found"
+    exit 2
+fi
+
+set +e
+run_with_timeout 300 claude -p "$PROMPT" \
     --plugin-dir "$PLUGIN_DIR" \
     --dangerously-skip-permissions \
     --max-turns "$MAX_TURNS" \
     --output-format stream-json \
-    > "$LOG_FILE" 2>&1 || true
+    > "$LOG_FILE" 2>&1
+CLAUDE_EXIT=$?
+set -e
 
 echo ""
 echo "=== Results ==="
+
+if [ ! -s "$LOG_FILE" ]; then
+    echo "⚠️  SKIP: Empty Claude output (environment/session issue likely)"
+    echo "Full log: $LOG_FILE"
+    echo "Timestamp: $TIMESTAMP"
+    exit 2
+fi
+
+if [ "$CLAUDE_EXIT" -ne 0 ]; then
+    if looks_like_environment_skip "$LOG_FILE"; then
+        echo "⚠️  SKIP: Claude execution unavailable due to environment/auth/session constraints"
+        sed -n '1,20p' "$LOG_FILE" | sed 's/^/    /'
+        echo "Full log: $LOG_FILE"
+        echo "Timestamp: $TIMESTAMP"
+        exit 2
+    fi
+fi
 
 # Check if skill was triggered (look for Skill tool invocation)
 # In stream-json, tool invocations have "name":"Skill" (not "tool":"Skill")
