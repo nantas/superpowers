@@ -13,7 +13,7 @@ Cloning this repository alone is not enough: you must run the installer to copy 
 ### Scenario 1: First-time install (no local clone yet)
 
 ```bash
-git clone https://github.com/obra/superpowers.git ~/.codex/superpowers
+git clone https://github.com/nantas/superpowers.git ~/.codex/superpowers
 ~/.codex/superpowers/.codex/install-local.sh --repo ~/.codex/superpowers
 ```
 

@@ -7,7 +7,7 @@ Guide for using Superpowers with OpenAI Codex via native skill discovery.
 First-time install (no local clone yet):
 
 ```bash
-git clone https://github.com/obra/superpowers.git ~/.codex/superpowers
+git clone https://github.com/nantas/superpowers.git ~/.codex/superpowers
 ~/.codex/superpowers/.codex/install-local.sh --repo ~/.codex/superpowers
 ```
 
@@ -29,7 +29,7 @@ Already in a local `superpowers` checkout:
 
 1. Clone the repo:
    ```bash
-   git clone https://github.com/obra/superpowers.git ~/.codex/superpowers
+   git clone https://github.com/nantas/superpowers.git ~/.codex/superpowers
    ```
 
 2. Install skills with the standalone script:
@@ -44,7 +44,7 @@ Already in a local `superpowers` checkout:
 Run with Git Bash:
 
 ```bash
-git clone https://github.com/obra/superpowers.git ~/.codex/superpowers
+git clone https://github.com/nantas/superpowers.git ~/.codex/superpowers
 bash ~/.codex/superpowers/.codex/install-local.sh --repo ~/.codex/superpowers
 ```
 

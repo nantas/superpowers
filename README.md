@@ -57,7 +57,7 @@ Use the standalone installer script (scenario-based):
 
 1. First-time install (no local clone yet):
 ```bash
-git clone https://github.com/obra/superpowers.git ~/.codex/superpowers
+git clone https://github.com/nantas/superpowers.git ~/.codex/superpowers
 ~/.codex/superpowers/.codex/install-local.sh --repo ~/.codex/superpowers
 ```
 
@@ -77,7 +77,7 @@ Then restart Codex (quit and relaunch the CLI) so skill discovery reloads.
 Tell OpenCode:
 
 ```
-Fetch and follow instructions from https://raw.githubusercontent.com/obra/superpowers/refs/heads/main/.opencode/INSTALL.md
+Fetch and follow instructions from https://raw.githubusercontent.com/nantas/superpowers/refs/heads/main/.opencode/INSTALL.md
 ```
 
 **Detailed docs:** [docs/README.opencode.md](docs/README.opencode.md)
