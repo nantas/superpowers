@@ -32,6 +32,9 @@ Use `./.codex/install-local.sh` when developing/testing against a local checkout
 - It replaces the destination directory on each run to keep files fresh.
 - Restart Codex after installation so native skill discovery reloads the updated files.
 
+This section assumes the repository is already cloned locally (developer workflow).
+For end-user first-time installation, use clone + installer as documented in `README.md`, `docs/README.codex.md`, and `.codex/INSTALL.md`.
+
 ## Coding Style & Naming Conventions
 - Bash: use `#!/usr/bin/env bash`, `set -euo pipefail`, and consistently quote variables.
 - JavaScript (`lib/`): follow existing CommonJS style (`require`/`module.exports`) and keep dependencies minimal.

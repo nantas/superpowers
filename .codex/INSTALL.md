@@ -1,67 +1,62 @@
 # Installing Superpowers for Codex
 
-Enable superpowers skills in Codex via native skill discovery. Just clone and symlink.
+Codex discovers skills from `~/.agents/skills/` at startup.  
+Cloning this repository alone is not enough: you must run the installer to copy skills into Codex's discovery path.
 
 ## Prerequisites
 
 - Git
+- Bash (macOS/Linux shell, or Git Bash on Windows)
 
-## Installation
+## Installation Scenarios
 
-1. **Clone the superpowers repository:**
-   ```bash
-   git clone https://github.com/obra/superpowers.git ~/.codex/superpowers
-   ```
+### Scenario 1: First-time install (no local clone yet)
 
-2. **Create the skills symlink:**
-   ```bash
-   mkdir -p ~/.agents/skills
-   ln -s ~/.codex/superpowers/skills ~/.agents/skills/superpowers
-   ```
+```bash
+git clone https://github.com/obra/superpowers.git ~/.codex/superpowers
+~/.codex/superpowers/.codex/install-local.sh --repo ~/.codex/superpowers
+```
 
-   **Windows (PowerShell):**
-   ```powershell
-   New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\.agents\skills"
-   cmd /c mklink /J "$env:USERPROFILE\.agents\skills\superpowers" "$env:USERPROFILE\.codex\superpowers\skills"
-   ```
+### Scenario 2: Repo already cloned locally (dev workflow)
 
-3. **Restart Codex** (quit and relaunch the CLI) to discover the skills.
+Run from this repo root:
 
-## Migrating from old bootstrap
+```bash
+./.codex/install-local.sh
+```
 
-If you installed superpowers before native skill discovery, you need to:
+Or from anywhere with an explicit path:
 
-1. **Update the repo:**
-   ```bash
-   cd ~/.codex/superpowers && git pull
-   ```
+```bash
+./.codex/install-local.sh --repo /abs/path/to/superpowers
+```
 
-2. **Create the skills symlink** (step 2 above) — this is the new discovery mechanism.
+### Scenario 3: Update an existing install
 
-3. **Remove the old bootstrap block** from `~/.codex/AGENTS.md` — any block referencing `superpowers-codex bootstrap` is no longer needed.
-
-4. **Restart Codex.**
+```bash
+cd ~/.codex/superpowers && git pull
+~/.codex/superpowers/.codex/install-local.sh --repo ~/.codex/superpowers
+```
 
 ## Verify
 
 ```bash
 ls -la ~/.agents/skills/superpowers
+find ~/.agents/skills/superpowers -mindepth 1 -maxdepth 2 -name SKILL.md | wc -l
 ```
 
-You should see a symlink (or junction on Windows) pointing to your superpowers skills directory.
+## Restart Codex
 
-## Updating
+After install/update, quit and relaunch Codex so skill discovery reloads.
+
+## Uninstall
 
 ```bash
-cd ~/.codex/superpowers && git pull
+rm -rf ~/.agents/skills/superpowers
 ```
 
-Skills update instantly through the symlink.
-
-## Uninstalling
+Optionally remove the clone:
 
 ```bash
-rm ~/.agents/skills/superpowers
+rm -rf ~/.codex/superpowers
 ```
-
-Optionally delete the clone: `rm -rf ~/.codex/superpowers`.

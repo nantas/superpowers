@@ -4,10 +4,17 @@ Guide for using Superpowers with OpenAI Codex via native skill discovery.
 
 ## Quick Install
 
-Tell Codex:
+First-time install (no local clone yet):
 
+```bash
+git clone https://github.com/obra/superpowers.git ~/.codex/superpowers
+~/.codex/superpowers/.codex/install-local.sh --repo ~/.codex/superpowers
 ```
-Fetch and follow instructions from https://raw.githubusercontent.com/obra/superpowers/refs/heads/main/.codex/INSTALL.md
+
+Already in a local `superpowers` checkout:
+
+```bash
+./.codex/install-local.sh
 ```
 
 ## Manual Installation
@@ -16,6 +23,7 @@ Fetch and follow instructions from https://raw.githubusercontent.com/obra/superp
 
 - OpenAI Codex CLI
 - Git
+- Bash (macOS/Linux shell, or Git Bash on Windows)
 
 ### Steps
 
@@ -24,32 +32,38 @@ Fetch and follow instructions from https://raw.githubusercontent.com/obra/superp
    git clone https://github.com/obra/superpowers.git ~/.codex/superpowers
    ```
 
-2. Create the skills symlink:
+2. Install skills with the standalone script:
    ```bash
-   mkdir -p ~/.agents/skills
-   ln -s ~/.codex/superpowers/skills ~/.agents/skills/superpowers
+   ~/.codex/superpowers/.codex/install-local.sh --repo ~/.codex/superpowers
    ```
 
-3. Restart Codex.
+3. Restart Codex (quit and relaunch the CLI).
 
 ### Windows
 
-Use a junction instead of a symlink (works without Developer Mode):
+Run with Git Bash:
 
-```powershell
-New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\.agents\skills"
-cmd /c mklink /J "$env:USERPROFILE\.agents\skills\superpowers" "$env:USERPROFILE\.codex\superpowers\skills"
+```bash
+git clone https://github.com/obra/superpowers.git ~/.codex/superpowers
+bash ~/.codex/superpowers/.codex/install-local.sh --repo ~/.codex/superpowers
 ```
 
 ## How It Works
 
-Codex has native skill discovery — it scans `~/.agents/skills/` at startup, parses SKILL.md frontmatter, and loads skills on demand. Superpowers skills are made visible through a single symlink:
+Codex has native skill discovery — it scans `~/.agents/skills/` at startup, parses SKILL.md frontmatter, and loads skills on demand. The standalone installer copies the latest files from:
 
 ```
-~/.agents/skills/superpowers/ → ~/.codex/superpowers/skills/
+~/.codex/superpowers/skills/
 ```
 
-The `using-superpowers` skill is discovered automatically and enforces skill usage discipline — no additional configuration needed.
+to:
+
+```
+~/.agents/skills/superpowers/
+```
+
+The destination is fully refreshed on each install run (no symlink/junction required).
+Cloning to `~/.codex/superpowers` alone does not make skills discoverable.
 
 ## Tool Mapping
 
@@ -99,19 +113,15 @@ The `description` field is how Codex decides when to activate a skill automatica
 
 ```bash
 cd ~/.codex/superpowers && git pull
+~/.codex/superpowers/.codex/install-local.sh --repo ~/.codex/superpowers
 ```
 
-Skills update instantly through the symlink.
+Restart Codex after updating.
 
 ## Uninstalling
 
 ```bash
 rm ~/.agents/skills/superpowers
-```
-
-**Windows (PowerShell):**
-```powershell
-Remove-Item "$env:USERPROFILE\.agents\skills\superpowers"
 ```
 
 Optionally delete the clone: `rm -rf ~/.codex/superpowers` (Windows: `Remove-Item -Recurse -Force "$env:USERPROFILE\.codex\superpowers"`).
@@ -120,13 +130,13 @@ Optionally delete the clone: `rm -rf ~/.codex/superpowers` (Windows: `Remove-Ite
 
 ### Skills not showing up
 
-1. Verify the symlink: `ls -la ~/.agents/skills/superpowers`
-2. Check skills exist: `ls ~/.codex/superpowers/skills`
+1. Verify install destination exists: `ls -la ~/.agents/skills/superpowers`
+2. Re-run installer: `~/.codex/superpowers/.codex/install-local.sh --repo ~/.codex/superpowers`
 3. Restart Codex — skills are discovered at startup
 
-### Windows junction issues
+### Windows bash not found
 
-Junctions normally work without special permissions. If creation fails, try running PowerShell as administrator.
+Install Git for Windows, then run installer via Git Bash.
 
 ## Testing
 

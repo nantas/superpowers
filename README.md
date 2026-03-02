@@ -53,11 +53,22 @@ In Cursor Agent chat, install from marketplace:
 
 ### Codex
 
-Tell Codex:
+Use the standalone installer script (scenario-based):
 
+1. First-time install (no local clone yet):
+```bash
+git clone https://github.com/obra/superpowers.git ~/.codex/superpowers
+~/.codex/superpowers/.codex/install-local.sh --repo ~/.codex/superpowers
 ```
-Fetch and follow instructions from https://raw.githubusercontent.com/obra/superpowers/refs/heads/main/.codex/INSTALL.md
+
+2. If you're already in a local superpowers checkout:
+```bash
+./.codex/install-local.sh
 ```
+
+Cloning into `~/.codex/superpowers` does not auto-register skills; the installer step is required.
+
+Then restart Codex (quit and relaunch the CLI) so skill discovery reloads.
 
 **Detailed docs:** [docs/README.codex.md](docs/README.codex.md)
 
