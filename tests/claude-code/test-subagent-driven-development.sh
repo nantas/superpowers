@@ -31,9 +31,9 @@ echo ""
 # Test 2: Verify skill describes correct workflow order
 echo "Test 2: Workflow ordering..."
 
-output=$(run_claude "In the subagent-driven-development skill, what comes first: spec compliance review or code quality review? Be specific about the order." 30)
+output=$(run_claude "In the subagent-driven-development skill, what comes first: spec compliance review or code quality review? Answer in one sentence with explicit before/after wording." 30)
 
-if assert_order "$output" "spec.*compliance" "code.*quality" "Spec compliance before code quality"; then
+if assert_contains "$output" "spec.*compliance.*before.*code.*quality\\|spec.*compliance.*comes first.*code.*quality\\|spec.*compliance.*first.*code.*quality\\|code.*quality.*after.*spec.*compliance\\|spec compliance review comes before code quality review" "Spec compliance before code quality"; then
     : # pass
 else
     exit 1
@@ -128,7 +128,7 @@ else
     exit 1
 fi
 
-if assert_not_contains "$output" "read.*file\|open.*file" "Doesn't make subagent read file"; then
+if assert_contains "$output" "does.*not.*read.*file\|don't.*read.*file\|not make.*read.*file" "Doesn't make subagent read file"; then
     : # pass
 else
     exit 1

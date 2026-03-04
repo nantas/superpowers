@@ -82,7 +82,7 @@ description: Use when [condition] - [what it does]
 
 Create project-specific skills in `.opencode/skills/` within your project.
 
-**Skill Priority:** Project skills > Personal skills > Superpowers skills
+**Skill resolution note:** OpenCode discovers project/personal/superpowers skills, but duplicate names can resolve differently across runtime/model paths. For deterministic behavior, avoid duplicate skill names across scopes.
 
 ## Updating
 
@@ -107,11 +107,15 @@ git pull
 
 ### Tool mapping
 
-When skills reference Claude Code tools:
-- `TodoWrite` → `update_plan`
-- `Task` with subagents → `@mention` syntax
-- `Skill` tool → OpenCode's native `skill` tool
-- File operations → your native tools
+Superpowers uses abstract runtime-adapter actions. Map them to OpenCode-native behavior:
+- `load_skill` → OpenCode native `skill` tool
+- `track_tasks` → `update_plan`
+- `spawn_worker` → subagent dispatch (`@mention` system)
+- `message_worker` → follow-up on active subagent thread (or re-dispatch with delta context)
+- `wait_worker` → wait for subagent completion/result channel
+- `close_worker` → explicit close when available, otherwise runtime-managed lifecycle
+
+Important: abstract adapter actions are not literal tool names. Detect native tools/signals first, then resolve capabilities.
 
 ## Getting Help
 

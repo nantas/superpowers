@@ -28,6 +28,19 @@ SPECIFIC_TEST=""
 TIMEOUT=300  # Default 5 minute timeout per test
 RUN_INTEGRATION=false
 
+run_with_timeout() {
+    local seconds="$1"
+    shift
+
+    if command -v timeout >/dev/null 2>&1; then
+        timeout "$seconds" "$@"
+    elif command -v gtimeout >/dev/null 2>&1; then
+        gtimeout "$seconds" "$@"
+    else
+        "$@"
+    fi
+}
+
 while [[ $# -gt 0 ]]; do
     case $1 in
         --verbose|-v)
@@ -57,6 +70,7 @@ while [[ $# -gt 0 ]]; do
             echo "  --help, -h           Show this help"
             echo ""
             echo "Tests:"
+            echo "  test-runtime-capability-probe.sh    Test runtime capability probing/mapping"
             echo "  test-subagent-driven-development.sh  Test skill loading and requirements"
             echo ""
             echo "Integration Tests (use --integration):"
@@ -73,6 +87,7 @@ done
 
 # List of skill tests to run (fast unit tests)
 tests=(
+    "test-runtime-capability-probe.sh"
     "test-subagent-driven-development.sh"
 )
 
@@ -118,7 +133,7 @@ for test in "${tests[@]}"; do
     start_time=$(date +%s)
 
     if [ "$VERBOSE" = true ]; then
-        if timeout "$TIMEOUT" bash "$test_path"; then
+        if run_with_timeout "$TIMEOUT" bash "$test_path"; then
             end_time=$(date +%s)
             duration=$((end_time - start_time))
             echo ""
@@ -138,7 +153,7 @@ for test in "${tests[@]}"; do
         fi
     else
         # Capture output for non-verbose mode
-        if output=$(timeout "$TIMEOUT" bash "$test_path" 2>&1); then
+        if output=$(run_with_timeout "$TIMEOUT" bash "$test_path" 2>&1); then
             end_time=$(date +%s)
             duration=$((end_time - start_time))
             echo "  [PASS] (${duration}s)"

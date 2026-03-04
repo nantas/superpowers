@@ -78,6 +78,16 @@ Superpowers skills should use capability-based adapter actions, then map to Code
 | `close_worker` | `close_agent` |
 
 Compatibility note: prefer capability detection over hardcoding runtime names or tool names in skill instructions.
+Do not treat missing abstract action names as missing capability. Detect native tools first, then resolve abstract actions through this mapping.
+
+## Capability Detection
+
+Before selecting execution mode, probe available tools in the active session and resolve adapter actions from native tool names:
+
+1. Enumerate available tools in the session.
+2. Resolve `track_tasks`/worker actions from the mapping table above.
+3. If any worker action is unclear, run a minimal worker smoke probe.
+4. Choose `parallel-worker` when equivalent worker lifecycle semantics are available; otherwise choose `fallback-serial`.
 
 ## Usage
 
@@ -149,6 +159,7 @@ cd ~/.codex/superpowers
 
 The test covers:
 - static scan for legacy hardcoded tool names in active skills/docs
+- runtime contract safeguard scan (anti-misclassification, probe/profile semantics)
 - Codex runtime capability probe (`update_plan`, `spawn_agent`, `send_input`, `wait`, `close_agent`)
 - behavior smoke check for runtime adapter terminology
 

@@ -61,12 +61,16 @@ export const SuperpowersPlugin = async ({ client, directory }) => {
     const fullContent = fs.readFileSync(skillPath, 'utf8');
     const { content } = extractAndStripFrontmatter(fullContent);
 
-    const toolMapping = `**Tool Mapping for OpenCode:**
-When skills reference tools you don't have, substitute OpenCode equivalents:
-- \`TodoWrite\` → \`update_plan\`
-- \`Task\` tool with subagents → Use OpenCode's subagent system (@mention)
-- \`Skill\` tool → OpenCode's native \`skill\` tool
-- \`Read\`, \`Write\`, \`Edit\`, \`Bash\` → Your native tools
+    const toolMapping = `**Runtime Adapter Mapping for OpenCode:**
+Resolve abstract actions to native OpenCode behavior:
+- \`load_skill\` → OpenCode native \`skill\` tool
+- \`track_tasks\` → \`update_plan\`
+- \`spawn_worker\` → subagent dispatch via \`@mention\`
+- \`message_worker\` → follow-up on active subagent thread (or re-dispatch with delta context)
+- \`wait_worker\` → wait for subagent completion/result channel
+- \`close_worker\` → explicit close when available, otherwise runtime-managed lifecycle
+
+Do not infer missing capability from missing abstract action names; probe native tools/signals first.
 
 **Skills location:**
 Superpowers skills are in \`${configDir}/skills/superpowers/\`

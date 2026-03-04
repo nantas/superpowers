@@ -92,6 +92,13 @@ Tests skill content and requirements (~2 minutes):
 - Review loops documented
 - Task context provision documented
 
+#### test-runtime-capability-probe.sh
+Tests runtime capability-detection reasoning (~1 minute):
+- Runtime-native tools/signals are considered first
+- Adapter actions are mapped from native equivalents
+- Anti-misclassification statement is present (abstract action != literal tool name)
+- Worker profile and execution mode are declared
+
 ### Integration Tests (use --integration flag)
 
 #### test-subagent-driven-development-integration.sh

@@ -21,6 +21,7 @@ Use capability-based actions from `../_shared/runtime-compat.md`:
 - `close_worker`
 
 Map these to platform-native tools.
+Do not treat missing abstract action names as missing capability; resolve native equivalents first.
 
 ## Global Multi-Agent Enforcement Policy (Mandatory)
 
@@ -36,7 +37,7 @@ When work involves a written plan or 2+ independent domains:
    - known constraints/exclusions
    - branch/worktree readiness
 3. Before any completion claim, invoke `verification-before-completion` with fresh evidence.
-4. If worker APIs are incomplete, run fallback-serial flow with equivalent checkpoints.
+4. Run fallback-serial only when the resolved worker profile is `unavailable` after capability resolution/probing.
 
 ## Required Mode Declaration (Once Per Session)
 

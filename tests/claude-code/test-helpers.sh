@@ -1,11 +1,26 @@
 #!/usr/bin/env bash
 # Helper functions for Claude Code skill tests
 
+# Run command with timeout using available platform tool.
+# Usage: run_with_timeout 60 command args...
+run_with_timeout() {
+    local seconds="$1"
+    shift
+
+    if command -v timeout >/dev/null 2>&1; then
+        timeout "$seconds" "$@"
+    elif command -v gtimeout >/dev/null 2>&1; then
+        gtimeout "$seconds" "$@"
+    else
+        "$@"
+    fi
+}
+
 # Run Claude Code with a prompt and capture output
 # Usage: run_claude "prompt text" [timeout_seconds] [allowed_tools]
 run_claude() {
     local prompt="$1"
-    local timeout="${2:-60}"
+    local timeout_seconds="${2:-60}"
     local allowed_tools="${3:-}"
     local output_file=$(mktemp)
 
@@ -16,7 +31,7 @@ run_claude() {
     fi
 
     # Run Claude in headless mode with timeout
-    if timeout "$timeout" bash -c "$cmd" > "$output_file" 2>&1; then
+    if run_with_timeout "$timeout_seconds" bash -c "$cmd" > "$output_file" 2>&1; then
         cat "$output_file"
         rm -f "$output_file"
         return 0
@@ -35,7 +50,7 @@ assert_contains() {
     local pattern="$2"
     local test_name="${3:-test}"
 
-    if echo "$output" | grep -q "$pattern"; then
+    if echo "$output" | grep -qi "$pattern"; then
         echo "  [PASS] $test_name"
         return 0
     else
@@ -54,7 +69,7 @@ assert_not_contains() {
     local pattern="$2"
     local test_name="${3:-test}"
 
-    if echo "$output" | grep -q "$pattern"; then
+    if echo "$output" | grep -qi "$pattern"; then
         echo "  [FAIL] $test_name"
         echo "  Did not expect to find: $pattern"
         echo "  In output:"
@@ -74,7 +89,7 @@ assert_count() {
     local expected="$3"
     local test_name="${4:-test}"
 
-    local actual=$(echo "$output" | grep -c "$pattern" || echo "0")
+    local actual=$(echo "$output" | grep -ic "$pattern" || echo "0")
 
     if [ "$actual" -eq "$expected" ]; then
         echo "  [PASS] $test_name (found $actual instances)"
@@ -98,8 +113,8 @@ assert_order() {
     local test_name="${4:-test}"
 
     # Get line numbers where patterns appear
-    local line_a=$(echo "$output" | grep -n "$pattern_a" | head -1 | cut -d: -f1)
-    local line_b=$(echo "$output" | grep -n "$pattern_b" | head -1 | cut -d: -f1)
+    local line_a=$(echo "$output" | grep -ni "$pattern_a" | head -1 | cut -d: -f1)
+    local line_b=$(echo "$output" | grep -ni "$pattern_b" | head -1 | cut -d: -f1)
 
     if [ -z "$line_a" ]; then
         echo "  [FAIL] $test_name: pattern A not found: $pattern_a"
@@ -193,6 +208,7 @@ EOF
 
 # Export functions for use in tests
 export -f run_claude
+export -f run_with_timeout
 export -f assert_contains
 export -f assert_not_contains
 export -f assert_count

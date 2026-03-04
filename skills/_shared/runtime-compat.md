@@ -14,6 +14,26 @@ At session start, identify whether runtime supports:
 - `wait_worker` (wait for worker completion)
 - `close_worker` (release worker)
 
+## Abstract-Action Resolution Contract (Normative)
+
+1. `track_tasks`, `load_skill`, `spawn_worker`, `message_worker`, `wait_worker`, and `close_worker` are abstract actions, not literal tool names.
+2. Controllers MUST resolve abstract actions to runtime-native tools and/or equivalent runtime-managed behavior before mode selection.
+3. Controllers MUST NOT infer "capability unavailable" solely because literal abstract action names are absent from the runtime tool list.
+4. If resolution is ambiguous, controllers MUST run a minimal capability probe before selecting fallback behavior.
+
+## Capability Probe Procedure (Normative)
+
+At session start (or before first orchestration), build and cache a capability map:
+
+1. Inspect runtime-visible tool inventory/signals for this session.
+2. Resolve each abstract action using known runtime aliases/equivalents.
+3. If worker lifecycle coverage is unclear, run a minimal worker probe:
+   - dispatch one trivial worker task,
+   - send follow-up only if runtime supports follow-up semantics,
+   - wait for completion/result,
+   - close explicitly only if runtime exposes close semantics.
+4. Persist the resolved worker profile for the session and reuse it for routing.
+
 ## Abstract Actions
 
 Use these action names in skill instructions and prompt templates:
@@ -24,11 +44,17 @@ Use these action names in skill instructions and prompt templates:
 - `wait_worker`: block until worker returns or timeout
 - `close_worker`: close worker when done
 
+## Worker Capability Profiles (Normative)
+
+- `full-lifecycle`: runtime exposes explicit equivalents for dispatch, follow-up, wait, and close.
+- `managed-lifecycle`: runtime supports dispatch + result collection while follow-up/close are implicit or emulated by runtime behavior.
+- `unavailable`: runtime cannot provide reliable worker dispatch/result semantics for scoped parallel work.
+
 ## Execution Mode Contract (Normative)
 
-1. If `spawn_worker`, `message_worker`, `wait_worker`, and `close_worker` are all available, orchestration MUST run in `parallel-worker` mode.
-2. If any worker capability is unavailable, orchestration MUST run in `fallback-serial` mode while preserving equivalent checkpoints and stage ordering.
-3. Controller MUST declare execution mode once per session before substantial execution.
+1. If resolved worker profile is `full-lifecycle` or `managed-lifecycle`, orchestration MUST run in `parallel-worker` mode.
+2. If resolved worker profile is `unavailable`, orchestration MUST run in `fallback-serial` mode while preserving equivalent checkpoints and stage ordering.
+3. Controller MUST declare execution mode once per session before substantial execution, and SHOULD include resolved worker profile.
 
 ## Permission Mode Contract (Normative)
 
@@ -39,6 +65,14 @@ Use these action names in skill instructions and prompt templates:
    - controller SHOULD route subsequent Git metadata writes through elevated strategy supported by the runtime;
    - read-only Git commands SHOULD remain unprivileged when possible.
 4. Controller MUST declare permission mode once per session and update declaration if mode changes.
+
+## Runtime Equivalence Hints (Reference; Verify Per Session)
+
+| Runtime | track/load | Worker dispatch | Follow-up | Wait/result | Close | Typical profile |
+| --- | --- | --- | --- | --- | --- | --- |
+| Codex | `update_plan`, native skill loading | `spawn_agent` | `send_input` | `wait` | `close_agent` | `full-lifecycle` |
+| OpenCode | `update_plan`, native `skill` tool | subagent dispatch via `@mention` system | threaded follow-up when supported; otherwise re-dispatch with delta context | runtime subagent completion/result channel | often runtime-managed | `managed-lifecycle` |
+| Claude Code | runtime planner tool, `Skill` tool | runtime subagent dispatch tool | follow-up instruction when runtime supports it; otherwise re-dispatch | task completion/result output | often implicit on completion | `managed-lifecycle` |
 
 ## Codex Mapping
 
@@ -55,7 +89,7 @@ For Codex multi-agent mode, map abstract actions to:
 
 ## Fallback for Non-Multi-Agent Runtimes
 
-When `spawn_worker`-style APIs are unavailable:
+When resolved worker profile is `unavailable`:
 1. Execute tasks sequentially in the main agent.
 2. Keep the same stages (implement -> review -> fix -> re-review).
 3. Use `track_tasks` if available; otherwise maintain a manual checklist in responses.

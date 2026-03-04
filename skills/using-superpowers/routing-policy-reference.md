@@ -4,13 +4,13 @@ Detailed routing guidance for `using-superpowers`.
 
 ## Routing Table
 
-| Task shape | Worker capability | Permission mode | Route |
+| Task shape | Resolved worker profile | Permission mode | Route |
 | --- | --- | --- | --- |
-| Written plan, mostly independent tasks, same session | complete | normal | `subagent-driven-development` + `parallel-worker` |
-| Written plan with batch checkpoints/handoff | complete/incomplete | normal | `executing-plans` (parallel when available, otherwise fallback-serial) |
-| 2+ independent domains | complete | normal | `dispatching-parallel-agents` + `parallel-worker` |
-| Any orchestration flow with missing worker actions | incomplete | normal | Preserve chosen orchestrator semantics in `fallback-serial` |
-| Any workflow with git lock/metadata write restrictions | complete/incomplete | git-write-restricted | Continue selected orchestrator; apply restricted git behavior from runtime-compat |
+| Written plan, mostly independent tasks, same session | `full-lifecycle` or `managed-lifecycle` | normal | `subagent-driven-development` + `parallel-worker` |
+| Written plan with batch checkpoints/handoff | any | normal | `executing-plans` (parallel for non-`unavailable`, otherwise fallback-serial) |
+| 2+ independent domains | `full-lifecycle` or `managed-lifecycle` | normal | `dispatching-parallel-agents` + `parallel-worker` |
+| Any orchestration flow with no reliable worker dispatch/result semantics | `unavailable` | normal | Preserve chosen orchestrator semantics in `fallback-serial` |
+| Any workflow with git lock/metadata write restrictions | any | `git-write-restricted` | Continue selected orchestrator; apply restricted git behavior from runtime-compat |
 
 ## Preflight Checklist
 
@@ -24,7 +24,7 @@ Run before first worker spawn:
 
 ## Fallback Rules
 
-If worker lifecycle operations are missing, do not skip checkpoints.
+If resolved worker profile is `unavailable`, do not skip checkpoints.
 
 - keep orchestration semantics,
 - execute tasks serially,

@@ -61,6 +61,21 @@ echo "Plugin installed to: $HOME/.config/opencode/superpowers/.opencode/plugins/
 echo "Plugin registered at: $HOME/.config/opencode/plugins/superpowers.js"
 echo "Test project at: $TEST_HOME/test-project"
 
+# Run command with timeout using available platform tool.
+# Usage: run_with_timeout 60 command args...
+run_with_timeout() {
+    local seconds="$1"
+    shift
+
+    if command -v timeout >/dev/null 2>&1; then
+        timeout "$seconds" "$@"
+    elif command -v gtimeout >/dev/null 2>&1; then
+        gtimeout "$seconds" "$@"
+    else
+        "$@"
+    fi
+}
+
 # Helper function for cleanup (call from tests or trap)
 cleanup_test_env() {
     if [ -n "${TEST_HOME:-}" ] && [ -d "$TEST_HOME" ]; then
@@ -69,5 +84,6 @@ cleanup_test_env() {
 }
 
 # Export for use in tests
+export -f run_with_timeout
 export -f cleanup_test_env
 export REPO_ROOT

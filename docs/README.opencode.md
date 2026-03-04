@@ -231,9 +231,11 @@ description: Use when [condition] - [what it does]
 
 OpenCode discovers skills from these locations:
 
-1. **Project skills** (`.opencode/skills/`) - Highest priority
+1. **Project skills** (`.opencode/skills/`)
 2. **Personal skills** (`~/.config/opencode/skills/`)
 3. **Superpowers skills** (`~/.config/opencode/skills/superpowers/`) - via symlink
+
+Note: when the same skill name exists in multiple locations, effective resolution can vary by runtime/model path. Prefer unique skill names across scopes for deterministic behavior.
 
 ## Features
 
@@ -247,12 +249,16 @@ Superpowers uses OpenCode's native `skill` tool for skill discovery and loading.
 
 ### Tool Mapping
 
-Skills written for Claude Code are automatically adapted for OpenCode. The bootstrap provides mapping instructions:
+Skills use abstract adapter actions and must resolve to OpenCode-native behavior:
 
-- `track_tasks` → `update_plan`
-- `spawn_worker` / dispatch subagent → OpenCode's `@mention` system
 - `load_skill` → OpenCode's native `skill` tool
-- File operations → native OpenCode tools
+- `track_tasks` → `update_plan`
+- `spawn_worker` → OpenCode subagent dispatch (`@mention` system)
+- `message_worker` → follow-up to the same subagent thread when supported; otherwise re-dispatch with delta context
+- `wait_worker` → wait for subagent completion/result through runtime response channel
+- `close_worker` → explicit close if available, otherwise rely on runtime-managed lifecycle
+
+Important: `spawn_worker` is an abstract action, not a literal tool name. Do not infer capability loss from missing abstract names; resolve equivalent OpenCode primitives first.
 
 ## Architecture
 

@@ -6,6 +6,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 PROJECT_DIR="$REPO_ROOT"
+RUNTIME_COMPAT_FILE="$REPO_ROOT/skills/_shared/runtime-compat.md"
 
 PASS_COUNT=0
 FAIL_COUNT=0
@@ -72,7 +73,7 @@ echo ""
 echo "Test 1: Static compatibility scan..."
 STATIC_OUT="$TMP_DIR/static-scan.txt"
 set +e
-rg -n "TodoWrite|Task tool|Task\\(" "$REPO_ROOT/skills" "$REPO_ROOT/docs" --glob '!**/plans/**' >"$STATIC_OUT" 2>&1
+rg -n "TodoWrite|Task tool|Task\\(" "$REPO_ROOT/skills" "$REPO_ROOT/docs" "$REPO_ROOT/.opencode/plugins" --glob '!**/plans/**' >"$STATIC_OUT" 2>&1
 RG_EXIT=$?
 set -e
 
@@ -84,6 +85,38 @@ elif [ "$RG_EXIT" -eq 0 ]; then
 else
     fail "Static scan command failed"
     sed 's/^/    /' "$STATIC_OUT"
+fi
+
+echo ""
+
+echo "Test 1b: Runtime capability contract safeguards..."
+CONTRACT_OUT="$TMP_DIR/contract-scan.txt"
+
+REQUIRED_PATTERNS=(
+    "abstract actions, not literal tool names"
+    "MUST NOT infer \"capability unavailable\""
+    "minimal capability probe"
+    "full-lifecycle"
+    "managed-lifecycle"
+    "Runtime Equivalence Hints"
+    "Codex"
+    "OpenCode"
+    "Claude Code"
+)
+
+MISSING=0
+for pattern in "${REQUIRED_PATTERNS[@]}"; do
+    if ! grep -qi "$pattern" "$RUNTIME_COMPAT_FILE"; then
+        echo "    missing contract pattern: $pattern" | tee -a "$CONTRACT_OUT"
+        MISSING=1
+    fi
+done
+
+if [ "$MISSING" -eq 0 ]; then
+    pass "Runtime contract defines alias/probe/profile safeguards across runtimes"
+else
+    fail "Runtime contract missing required anti-misclassification safeguards"
+    sed 's/^/    /' "$CONTRACT_OUT"
 fi
 
 echo ""

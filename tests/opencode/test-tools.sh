@@ -25,8 +25,8 @@ fi
 echo "Test 1: Testing find_skills tool..."
 echo "  Running opencode with find_skills request..."
 
-# Use timeout to prevent hanging, capture both stdout and stderr
-output=$(timeout 60s opencode run --print-logs "Use the find_skills tool to list available skills. Just call the tool and show me the raw output." 2>&1) || {
+# Use timeout guard to prevent hanging, capture both stdout and stderr
+output=$(run_with_timeout 60 opencode run --print-logs "Use the find_skills tool to list available skills. Just call the tool and show me the raw output." 2>&1) || {
     exit_code=$?
     if [ $exit_code -eq 124 ]; then
         echo "  [FAIL] OpenCode timed out after 60s"
@@ -57,7 +57,7 @@ echo ""
 echo "Test 2: Testing use_skill tool..."
 echo "  Running opencode with use_skill request..."
 
-output=$(timeout 60s opencode run --print-logs "Use the use_skill tool to load the personal-test skill and show me what you get." 2>&1) || {
+output=$(run_with_timeout 60 opencode run --print-logs "Use the use_skill tool to load the personal-test skill and show me what you get." 2>&1) || {
     exit_code=$?
     if [ $exit_code -eq 124 ]; then
         echo "  [FAIL] OpenCode timed out after 60s"
@@ -81,7 +81,7 @@ echo ""
 echo "Test 3: Testing use_skill with superpowers: prefix..."
 echo "  Running opencode with superpowers:brainstorming skill..."
 
-output=$(timeout 60s opencode run --print-logs "Use the use_skill tool to load superpowers:brainstorming and tell me the first few lines of what you received." 2>&1) || {
+output=$(run_with_timeout 60 opencode run --print-logs "Use the use_skill tool to load superpowers:brainstorming and tell me the first few lines of what you received." 2>&1) || {
     exit_code=$?
     if [ $exit_code -eq 124 ]; then
         echo "  [FAIL] OpenCode timed out after 60s"
