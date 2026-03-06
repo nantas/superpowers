@@ -163,6 +163,31 @@ fi
 
 echo ""
 
+echo "Test 1d: Finishing base-branch detection guidance..."
+FINISHING_BRANCH_FILE="$REPO_ROOT/skills/finishing-a-development-branch/SKILL.md"
+
+BASE_BRANCH_PATTERNS=(
+    "branch: Created from"
+    "Do not assume main/master"
+    "ask the user to confirm base branch"
+)
+
+MISSING=0
+for pattern in "${BASE_BRANCH_PATTERNS[@]}"; do
+    if ! grep -qi "$pattern" "$FINISHING_BRANCH_FILE"; then
+        echo "    missing base-branch pattern: $pattern"
+        MISSING=1
+    fi
+done
+
+if [ "$MISSING" -eq 0 ]; then
+    pass "finishing-a-development-branch documents base-branch detection from worktree origin"
+else
+    fail "finishing-a-development-branch missing base-branch detection guidance"
+fi
+
+echo ""
+
 # Integration tests require codex CLI.
 if ! command -v codex >/dev/null 2>&1; then
     skip "codex CLI not found; skipping runtime integration checks"

@@ -40,11 +40,13 @@ Stop. Don't proceed to Step 2.
 ### Step 2: Determine Base Branch
 
 ```bash
-# Try common base branches
-git merge-base HEAD main 2>/dev/null || git merge-base HEAD master 2>/dev/null
+# Prefer the branch this worktree was created from (reflog entry)
+git reflog show --format=%gs --reverse <feature-branch> | rg -m1 "branch: Created from " | sed 's/branch: Created from //'
 ```
 
-Or ask: "This branch split from main - is that correct?"
+Do not assume main/master.
+If the reflog lookup is empty, ask the user to confirm base branch before proceeding.
+If the user confirms main/master, use that.
 
 ### Step 3: Present Options
 
