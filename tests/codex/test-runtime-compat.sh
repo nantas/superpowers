@@ -128,6 +128,7 @@ ROUTING_POLICY_FILE="$REPO_ROOT/skills/using-superpowers/routing-policy-referenc
 LARGE_GUARD_PATTERNS=(
     "repo/worktree scale risk"
     "large-worktree-risk"
+    "large-worktree cache"
     "Skip heavy baseline checks"
     "git ls-files | wc -l"
     "git count-objects -v"

@@ -58,6 +58,8 @@ When `large-worktree-risk` is true, ask before expensive checks:
 "Large Unity/monorepo detected. Skip heavy baseline checks for this run?"
 If skipped, record this under known constraints/exclusions and proceed with minimal verification.
 
+Large-worktree cache: Cache: large-worktree-risk=<true/false>, heavy-checks-skipped=<true/false>
+
 ## Required Mode Declaration (Once Per Session)
 
 Declare:
