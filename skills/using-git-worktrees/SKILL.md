@@ -40,6 +40,8 @@ Global location (`~/.config/superpowers/worktrees/...`) does not require repo ig
 4. Run setup based on detected stack files (`package.json`, `Cargo.toml`, `pyproject.toml`, `go.mod`).
 5. Run baseline tests.
 
+If large-worktree cache reports `large-worktree-risk=true` and `heavy-checks-skipped=true`, skip baseline tests and report minimal verification only.
+
 If baseline tests fail, report and ask whether to proceed.
 
 ## Reporting Format

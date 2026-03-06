@@ -124,6 +124,7 @@ echo ""
 echo "Test 1c: Large worktree guard policy presence..."
 USING_SUPERPOWERS_FILE="$REPO_ROOT/skills/using-superpowers/SKILL.md"
 ROUTING_POLICY_FILE="$REPO_ROOT/skills/using-superpowers/routing-policy-reference.md"
+USING_GIT_WORKTREES_FILE="$REPO_ROOT/skills/using-git-worktrees/SKILL.md"
 
 LARGE_GUARD_PATTERNS=(
     "repo/worktree scale risk"
@@ -146,6 +147,10 @@ if [ "$MISSING" -eq 0 ]; then
     pass "using-superpowers defines fast large-worktree detection and skip prompt policy"
 else
     fail "Large-worktree guard policy missing required terms"
+fi
+
+if ! grep -qi "large-worktree cache" "$USING_GIT_WORKTREES_FILE"; then
+    fail "using-git-worktrees missing large-worktree cache reuse guidance"
 fi
 
 echo ""
