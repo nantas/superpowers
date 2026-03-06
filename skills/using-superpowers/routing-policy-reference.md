@@ -18,9 +18,13 @@ Run before first worker spawn:
 
 - lock and permission readiness
 - branch/worktree validity
+- repo/worktree scale risk (Unity/monorepo guard)
 - dependency/tooling baseline
 - known failing commands and exclusions
 - critical command availability
+
+For Unity/very large repos, prefer quick metadata probes (`git ls-files`, `git count-objects -v`, Unity marker paths) before any heavy scan.
+If large-worktree risk is detected, ask whether to skip heavy baseline checks and record that choice in exclusions.
 
 ## Fallback Rules
 

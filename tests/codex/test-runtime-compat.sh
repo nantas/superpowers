@@ -121,6 +121,34 @@ fi
 
 echo ""
 
+echo "Test 1c: Large worktree guard policy presence..."
+USING_SUPERPOWERS_FILE="$REPO_ROOT/skills/using-superpowers/SKILL.md"
+ROUTING_POLICY_FILE="$REPO_ROOT/skills/using-superpowers/routing-policy-reference.md"
+
+LARGE_GUARD_PATTERNS=(
+    "repo/worktree scale risk"
+    "large-worktree-risk"
+    "Skip heavy baseline checks"
+    "git ls-files | wc -l"
+    "git count-objects -v"
+)
+
+MISSING=0
+for pattern in "${LARGE_GUARD_PATTERNS[@]}"; do
+    if ! grep -qi "$pattern" "$USING_SUPERPOWERS_FILE" "$ROUTING_POLICY_FILE"; then
+        echo "    missing large-worktree pattern: $pattern"
+        MISSING=1
+    fi
+done
+
+if [ "$MISSING" -eq 0 ]; then
+    pass "using-superpowers defines fast large-worktree detection and skip prompt policy"
+else
+    fail "Large-worktree guard policy missing required terms"
+fi
+
+echo ""
+
 # Integration tests require codex CLI.
 if ! command -v codex >/dev/null 2>&1; then
     skip "codex CLI not found; skipping runtime integration checks"

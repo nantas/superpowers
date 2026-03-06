@@ -36,8 +36,27 @@ When work involves a written plan or 2+ independent domains:
    - dependencies/tooling
    - known constraints/exclusions
    - branch/worktree readiness
+   - repo/worktree scale risk (Unity/monorepo guard)
 3. Before any completion claim, invoke `verification-before-completion` with fresh evidence.
 4. Run fallback-serial only when the resolved worker profile is `unavailable` after capability resolution/probing.
+
+### Preflight: Large Unity/Monorepo Guard
+
+Use fast probes first (index/metadata only). Avoid recursive scans unless user requests them.
+
+- Unity markers: `ProjectSettings/ProjectVersion.txt`, `Assets/`, `Packages/manifest.json`
+- Tracked files: `git ls-files | wc -l`
+- Pack size KiB: `git count-objects -v | awk '/size-pack/ {print $2}'`
+- Heavy generated tree presence: `Library/`
+
+Classify `large-worktree-risk` when either condition is true:
+
+- Unity markers present and one of: tracked files `>= 200000`, pack size `>= 2000000`, `Library/` exists.
+- Tracked files `>= 500000` (any repo type).
+
+When `large-worktree-risk` is true, ask before expensive checks:
+"Large Unity/monorepo detected. Skip heavy baseline checks for this run?"
+If skipped, record this under known constraints/exclusions and proceed with minimal verification.
 
 ## Required Mode Declaration (Once Per Session)
 
