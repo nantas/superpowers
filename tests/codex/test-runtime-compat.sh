@@ -157,6 +157,10 @@ if ! grep -qi "large-worktree cache" "$USING_GIT_WORKTREES_FILE"; then
     fail "using-git-worktrees missing large-worktree cache reuse guidance"
 fi
 
+if ! grep -qi "heavy-checks-skipped" "$USING_SUPERPOWERS_FILE"; then
+    fail "using-superpowers missing heavy-checks-skipped cache field"
+fi
+
 echo ""
 
 # Integration tests require codex CLI.
