@@ -25,6 +25,7 @@ Run before first worker spawn:
 
 For Unity/very large repos, prefer quick metadata probes (`git ls-files`, `git count-objects -v`, Unity marker paths) before any heavy scan.
 If large-worktree risk is detected, ask whether to skip heavy baseline checks and record that choice in exclusions.
+If a large-worktree cache exists, reuse it and do not re-ask unless context changes.
 
 ## Fallback Rules
 

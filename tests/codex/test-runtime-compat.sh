@@ -149,6 +149,10 @@ else
     fail "Large-worktree guard policy missing required terms"
 fi
 
+if ! grep -qi "large-worktree cache" "$ROUTING_POLICY_FILE"; then
+    fail "routing policy missing large-worktree cache reuse guidance"
+fi
+
 if ! grep -qi "large-worktree cache" "$USING_GIT_WORKTREES_FILE"; then
     fail "using-git-worktrees missing large-worktree cache reuse guidance"
 fi
