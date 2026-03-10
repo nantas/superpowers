@@ -80,6 +80,25 @@ Superpowers skills should use capability-based adapter actions, then map to Code
 Compatibility note: prefer capability detection over hardcoding runtime names or tool names in skill instructions.
 Do not treat missing abstract action names as missing capability. Detect native tools first, then resolve abstract actions through this mapping.
 
+## Codex Wait Semantics (Required)
+
+Worker completion in Codex MUST come from `wait` final status (`status`/`timed_out` equivalents), not from file/log/commit polling.
+
+- `wait(ids=[...])` is wait-any: one final worker returns per call.
+- For parallel workers, maintain `pending_ids` and loop until empty.
+- `subagent_notification` is asynchronous context; do not use it as the completion gate for the current stage.
+
+Example:
+
+```text
+pending_ids = [worker_a, worker_b, worker_c]
+while pending_ids not empty:
+  result = wait(pending_ids)  # wait-any
+  if result is final:
+    remove completed id from pending_ids
+    close_agent(completed id)
+```
+
 ## Capability Detection
 
 Before selecting execution mode, probe available tools in the active session and resolve adapter actions from native tool names:
@@ -157,11 +176,19 @@ cd ~/.codex/superpowers
 ./tests/codex/run-tests.sh
 ```
 
+Include the optional integration evidence check:
+
+```bash
+cd ~/.codex/superpowers
+./tests/codex/run-tests.sh --integration
+```
+
 The test covers:
 - static scan for legacy hardcoded tool names in active skills/docs
 - runtime contract safeguard scan (anti-misclassification, probe/profile semantics)
 - Codex runtime capability probe (`update_plan`, `spawn_agent`, `send_input`, `wait`, `close_agent`)
 - behavior smoke check for runtime adapter terminology
+- wait-based completion evidence (`wait` as source of truth, no artifact polling, pending_ids loop)
 
 ## Getting Help
 

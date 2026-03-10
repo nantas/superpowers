@@ -46,11 +46,16 @@ Each prompt must include:
 ### 3) Dispatch concurrently
 
 ```text
-spawn_worker(domain_A)
-spawn_worker(domain_B)
-spawn_worker(domain_C)
-wait_worker(all)
-close_worker(all)
+id_A = spawn_worker(domain_A)
+id_B = spawn_worker(domain_B)
+id_C = spawn_worker(domain_C)
+
+pending_ids = [id_A, id_B, id_C]
+while pending_ids not empty:
+  result = wait_worker(pending_ids)  # wait-any
+  if result is final:
+    close_worker(result.worker_id)
+    remove result.worker_id from pending_ids
 ```
 
 ### 4) Integrate safely

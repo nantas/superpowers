@@ -41,8 +41,16 @@ Use these action names in skill instructions and prompt templates:
 - `load_skill`: activate/read the target skill before execution
 - `spawn_worker`: launch a worker for a scoped task
 - `message_worker`: send additional context, clarifications, or fix instructions
-- `wait_worker`: block until worker returns or timeout
+- `wait_worker`: block until worker returns or timeout; when wait is wait-any over multiple ids, loop until `pending_ids` is empty
 - `close_worker`: close worker when done
+
+## Worker Completion Contract (Normative)
+
+1. Completion source of truth MUST be `wait_worker` final status (`status`/`timed_out` or runtime equivalent).
+2. Controllers MUST NOT treat file changes, log output, or commit appearance as worker completion.
+3. If runtime wait is wait-any for multi-id calls, controllers MUST keep a `pending_ids` set and call `wait_worker(pending_ids)` until empty.
+4. Async notification channels (for example Codex `subagent_notification`) MAY add context, but MUST NOT replace `wait_worker` as a stage gate.
+5. After each final wait result, controllers SHOULD call `close_worker` when runtime close semantics exist.
 
 ## Worker Capability Profiles (Normative)
 
@@ -86,6 +94,13 @@ For Codex multi-agent mode, map abstract actions to:
 | `message_worker` | `send_input` |
 | `wait_worker` | `wait` |
 | `close_worker` | `close_agent` |
+
+### Codex Wait Semantics (Normative)
+
+1. `wait(ids=[...])` returns when any listed worker reaches a final state (wait-any), not when all complete.
+2. For parallel workers, controllers MUST loop on a `pending_ids` set until all worker ids are removed by final wait results.
+3. In Codex, worker completion MUST come from `wait` results, not artifact polling.
+4. `subagent_notification` events are asynchronous context updates and MUST NOT be used as completion gates.
 
 ## Fallback for Non-Multi-Agent Runtimes
 

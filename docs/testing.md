@@ -14,6 +14,7 @@ tests/
 ├── codex/
 │   ├── run-tests.sh
 │   ├── test-runtime-compat.sh
+│   ├── test-wait-completion-evidence.sh
 │   └── test-skill-context-budget.sh
 ├── claude-code/
 │   ├── test-helpers.sh                    # Shared test utilities
@@ -50,6 +51,7 @@ Enable integration variants:
 
 ```bash
 ./tests/codex/run-tests.sh
+./tests/codex/run-tests.sh --integration
 ./tests/codex/test-skill-context-budget.sh
 ./tests/opencode/run-tests.sh
 ./tests/claude-code/run-skill-tests.sh

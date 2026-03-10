@@ -3,7 +3,7 @@
 Use this template when dispatching an implementer subagent.
 
 ```
-Runtime adapter (`spawn_worker`):
+Runtime adapter (`spawn_worker` -> `wait_worker` -> `close_worker`):
   role: "general-purpose implementer"
   description: "Implement Task N: [task name]"
   message: |

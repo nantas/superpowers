@@ -17,12 +17,18 @@ Controller -> Implementer
 Implementer asks clarification
 Controller answers
 Implementer delivers code + tests + self-review
+Controller waits for implementer final status
+Controller closes implementer worker
 
 Controller -> Spec Reviewer
 Spec Reviewer: approved
+Controller waits for spec reviewer final status
+Controller closes spec reviewer worker
 
 Controller -> Code Reviewer
 Code Reviewer: approved
+Controller waits for code reviewer final status
+Controller closes code reviewer worker
 
 Controller marks Task 1 complete
 ```
@@ -32,24 +38,38 @@ Controller marks Task 1 complete
 ```text
 Controller -> Implementer
 Implementer delivers code + tests
+Controller waits for implementer final status
+Controller closes implementer worker
 
 Controller -> Spec Reviewer
 Spec Reviewer: missing required progress reporting
+Controller waits for spec reviewer final status
+Controller closes spec reviewer worker
 
 Controller -> Implementer (fix)
 Implementer adds progress reporting
+Controller waits for implementer final status
+Controller closes implementer worker
 
 Controller -> Spec Reviewer
 Spec Reviewer: approved
+Controller waits for spec reviewer final status
+Controller closes spec reviewer worker
 
 Controller -> Code Reviewer
 Code Reviewer: magic number warning
+Controller waits for code reviewer final status
+Controller closes code reviewer worker
 
 Controller -> Implementer (fix)
 Implementer extracts constant
+Controller waits for implementer final status
+Controller closes implementer worker
 
 Controller -> Code Reviewer
 Code Reviewer: approved
+Controller waits for code reviewer final status
+Controller closes code reviewer worker
 
 Controller marks Task 2 complete
 ```
@@ -64,6 +84,6 @@ After last task:
 
 ## Operational notes
 
-- Keep one implementer worker per task for continuity.
+- Keep implementation ownership per task consistent (follow-up same worker when supported; otherwise re-dispatch with equivalent context).
 - Never skip re-review after fixes.
 - Never start next task with unresolved review findings.

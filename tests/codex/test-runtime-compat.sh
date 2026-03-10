@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Test: Codex runtime compatibility for superpowers skills.
-# Verifies adapter terminology, Codex tool availability, and a behavior smoke check.
+# Verifies adapter terminology, Codex tool availability, and wait-based completion gate semantics.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -96,6 +96,11 @@ REQUIRED_PATTERNS=(
     "abstract actions, not literal tool names"
     "MUST NOT infer \"capability unavailable\""
     "minimal capability probe"
+    "Completion source of truth MUST be"
+    "MUST NOT treat file changes, log output, or commit appearance"
+    "pending_ids"
+    "wait-any"
+    "subagent_notification"
     "full-lifecycle"
     "managed-lifecycle"
     "Runtime Equivalence Hints"
@@ -188,6 +193,49 @@ fi
 
 echo ""
 
+echo "Test 1e: Subagent lifecycle template safeguards..."
+SDD_SKILL_FILE="$REPO_ROOT/skills/subagent-driven-development/SKILL.md"
+IMPLEMENTER_PROMPT_FILE="$REPO_ROOT/skills/subagent-driven-development/implementer-prompt.md"
+SPEC_REVIEWER_PROMPT_FILE="$REPO_ROOT/skills/subagent-driven-development/spec-reviewer-prompt.md"
+QUALITY_REVIEWER_PROMPT_FILE="$REPO_ROOT/skills/subagent-driven-development/code-quality-reviewer-prompt.md"
+
+MISSING=0
+if ! grep -q 'spawn_worker` -> `wait_worker` -> `close_worker' "$IMPLEMENTER_PROMPT_FILE"; then
+    echo "    implementer prompt missing spawn->wait->close lifecycle"
+    MISSING=1
+fi
+
+if ! grep -q 'spawn_worker` -> `wait_worker` -> `close_worker' "$SPEC_REVIEWER_PROMPT_FILE"; then
+    echo "    spec reviewer prompt missing spawn->wait->close lifecycle"
+    MISSING=1
+fi
+
+if ! grep -q 'spawn_worker` -> `wait_worker` -> `close_worker' "$QUALITY_REVIEWER_PROMPT_FILE"; then
+    echo "    code-quality reviewer prompt missing spawn->wait->close lifecycle"
+    MISSING=1
+fi
+
+SDD_PATTERNS=(
+    "Completion gate source of truth"
+    "Never use file changes, log output, or commit appearance"
+    "pending_ids"
+)
+
+for pattern in "${SDD_PATTERNS[@]}"; do
+    if ! grep -qi "$pattern" "$SDD_SKILL_FILE"; then
+        echo "    subagent-driven-development missing pattern: $pattern"
+        MISSING=1
+    fi
+done
+
+if [ "$MISSING" -eq 0 ]; then
+    pass "Subagent workflow/templates require wait-based completion gates and lifecycle closure"
+else
+    fail "Subagent workflow/templates missing wait lifecycle and completion-gate safeguards"
+fi
+
+echo ""
+
 # Integration tests require codex CLI.
 if ! command -v codex >/dev/null 2>&1; then
     skip "codex CLI not found; skipping runtime integration checks"
@@ -246,7 +294,7 @@ if [ "$INTEGRATION_SKIPPED" = false ]; then
     SMOKE_OUT="$TMP_DIR/smoke.txt"
 
     set +e
-    run_codex_exec "Use superpowers:using-superpowers. In one short answer, list: runtime adapter actions for task tracking and worker orchestration; the three orchestrator route names; execution mode names; permission mode names; and the required completion verification gate skill." >"$SMOKE_OUT" 2>&1
+    run_codex_exec "Use superpowers:using-superpowers. In one short answer, list: runtime adapter actions for task tracking and worker orchestration; the three orchestrator route names; execution mode names; permission mode names; and the required completion verification gate skill. Also include these exact phrases: 'wait is completion source of truth', 'no artifact polling', and 'wait-any needs pending_ids loop'." >"$SMOKE_OUT" 2>&1
     SMOKE_EXIT=$?
     set -e
 
@@ -271,6 +319,9 @@ if [ "$INTEGRATION_SKIPPED" = false ]; then
             "normal"
             "git-write-restricted"
             "verification-before-completion"
+            "wait is completion source of truth"
+            "no artifact polling"
+            "wait-any needs pending_ids loop"
         )
 
         MISSING=0

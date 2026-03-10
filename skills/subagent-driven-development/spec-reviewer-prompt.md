@@ -5,7 +5,7 @@ Use this template when dispatching a spec compliance reviewer subagent.
 **Purpose:** Verify implementer built what was requested (nothing more, nothing less)
 
 ```
-Runtime adapter (`spawn_worker`):
+Runtime adapter (`spawn_worker` -> `wait_worker` -> `close_worker`):
   role: "spec compliance reviewer"
   description: "Review spec compliance for Task N"
   message: |

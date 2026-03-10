@@ -27,9 +27,16 @@ Use `executing-plans` instead for handoff/batch execution in a separate session.
 2. Initialize `track_tasks` for all tasks.
 3. For each task, run full gate sequence:
    - dispatch implementer worker with exact task text + context,
-   - answer implementer questions before coding,
-   - dispatch spec reviewer; fix until spec-compliant,
-   - dispatch code-quality reviewer; fix until approved,
+   - wait for implementer final status via `wait_worker`,
+   - close implementer worker via `close_worker`,
+   - dispatch spec reviewer,
+   - wait for spec reviewer final status via `wait_worker`,
+   - close spec reviewer via `close_worker`,
+   - if spec review finds issues: implement fixes and re-run spec review until approved,
+   - dispatch code-quality reviewer,
+   - wait for code-quality reviewer final status via `wait_worker`,
+   - close code-quality reviewer via `close_worker`,
+   - if code-quality review finds issues: implement fixes and re-run code-quality review until approved,
    - mark task complete.
 4. After all tasks, run final overall code review.
 5. Hand off to `superpowers:finishing-a-development-branch`.
@@ -51,11 +58,20 @@ Never invert this order.
 
 If either reviewer reports issues:
 
-1. return task to the same implementer worker,
+1. return task to implementer via `message_worker` when follow-up is supported, otherwise spawn a new implementer worker with fix context,
 2. implement fixes,
-3. re-run the same reviewer,
-4. repeat until approved,
-5. only then proceed.
+3. wait for implementer final status via `wait_worker`,
+4. close implementer worker via `close_worker`,
+5. re-run the same reviewer with `spawn_worker` -> `wait_worker` -> `close_worker`,
+6. repeat until approved,
+7. only then proceed.
+
+## Completion Signal Rules
+
+1. Completion gate source of truth is reviewer/implementer `wait_worker` final status.
+2. Never use file changes, log output, or commit appearance as completion signals.
+3. For parallel waits, keep `pending_ids` and loop `wait_worker(pending_ids)` until empty.
+4. Treat async worker notifications as informational context only, not completion gates.
 
 ## Red Flags
 
