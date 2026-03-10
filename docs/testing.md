@@ -14,6 +14,7 @@ tests/
 ├── codex/
 │   ├── run-tests.sh
 │   ├── test-runtime-compat.sh
+│   ├── test-brainstorming-complex-contract.sh
 │   ├── test-wait-completion-evidence.sh
 │   └── test-skill-context-budget.sh
 ├── claude-code/
