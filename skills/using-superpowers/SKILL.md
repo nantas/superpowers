@@ -62,13 +62,13 @@ Large-worktree cache: Cache: large-worktree-risk=<true/false>, heavy-checks-skip
 
 ## Required Runtime Status Summary (Once Per Session)
 
-Declare one combined, user-facing runtime status summary in the user's language.
+Declare one user-facing runtime status summary in the user's language.
 
 The declaration MUST include:
 
 - plain-language execution behavior + mode label (`parallel-worker` or `fallback-serial`)
 - plain-language Git write capability + mode label (`normal` or `git-write-restricted`)
-- one practical impact sentence for what this means right now
+- one practical impact sentence
 
 Mode semantics and combined-state examples are defined in `../_shared/runtime-compat.md`.
 
@@ -81,8 +81,8 @@ Reference format:
 
 Invoke relevant/requested skills before any response, including clarifications.
 
-- Process skills first (for approach discipline)
-- Implementation skills second (for execution details)
+- Process skills first
+- Implementation skills second
 
 ## Integration
 
