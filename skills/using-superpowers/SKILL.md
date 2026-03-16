@@ -60,14 +60,22 @@ If skipped, record this under known constraints/exclusions and proceed with mini
 
 Large-worktree cache: Cache: large-worktree-risk=<true/false>, heavy-checks-skipped=<true/false>
 
-## Required Mode Declaration (Once Per Session)
+## Required Runtime Status Summary (Once Per Session)
 
-Declare:
+Declare one combined, user-facing runtime status summary in the user's language.
 
-- execution mode: `parallel-worker` or `fallback-serial`
-- permission mode: `normal` or `git-write-restricted`
+The declaration MUST include:
 
-Mode semantics are defined in `../_shared/runtime-compat.md`.
+- plain-language execution behavior + mode label (`parallel-worker` or `fallback-serial`)
+- plain-language Git write capability + mode label (`normal` or `git-write-restricted`)
+- one practical impact sentence for what this means right now
+
+Mode semantics and combined-state examples are defined in `../_shared/runtime-compat.md`.
+
+Reference format:
+
+- `Runtime status: Parallel subtask execution (parallel-worker) + standard Git write capability (normal). Impact: independent tasks run concurrently and normal Git metadata writes can proceed.`
+- `Runtime status: Sequential fallback execution (fallback-serial) + restricted Git writes (git-write-restricted). Impact: tasks run one-by-one and repeated non-escalated retries for the same Git metadata write are avoided after lock failures.`
 
 ## Invocation Rule
 

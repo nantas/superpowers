@@ -9,7 +9,7 @@ source "$SCRIPT_DIR/test-helpers.sh"
 echo "=== Test: Claude Runtime Capability Probe ==="
 echo ""
 
-probe_prompt="Use superpowers:using-superpowers. In one short answer: list runtime-visible native tools/signals in this session, map them to load_skill/track_tasks/spawn_worker/message_worker/wait_worker/close_worker, declare worker profile and execution mode, and explicitly state that abstract actions are not literal tool names."
+probe_prompt="Use superpowers:using-superpowers. In one short answer: list runtime-visible native tools/signals in this session, map them to load_skill/track_tasks/spawn_worker/message_worker/wait_worker/close_worker, declare worker profile/execution mode/permission mode, provide a user-facing runtime status summary combining execution + permission in plain language, and explicitly state that abstract actions are not literal tool names."
 
 set +e
 output=$(run_claude "$probe_prompt" 90 2>&1)
@@ -45,6 +45,18 @@ else
 fi
 
 if assert_contains "$output" "parallel-worker\|fallback-serial\|execution mode\|foreground\|background" "Execution mode declared"; then
+    :
+else
+    exit 1
+fi
+
+if assert_contains "$output" "normal\|git-write-restricted\|permission mode" "Permission mode declared"; then
+    :
+else
+    exit 1
+fi
+
+if assert_contains "$output" "user-facing runtime status\|plain language\|what this means\|runtime status" "User-facing runtime summary declared"; then
     :
 else
     exit 1

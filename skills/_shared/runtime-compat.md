@@ -74,6 +74,26 @@ Use these action names in skill instructions and prompt templates:
    - read-only Git commands SHOULD remain unprivileged when possible.
 4. Controller MUST declare permission mode once per session and update declaration if mode changes.
 
+## Runtime Status Summary Contract (Normative)
+
+1. Controller MUST provide one user-facing runtime status summary once per session before substantial execution, and MUST update it if execution mode or permission mode changes.
+2. The user-facing runtime status summary MUST combine execution mode + permission mode in one coherent statement.
+3. The summary MUST include:
+   - plain-language execution behavior (what task scheduling behavior the user should expect),
+   - plain-language git write capability (what Git metadata writes are expected to work in this session),
+   - machine-readable mode labels in parentheses for both values.
+4. The summary MUST include a practical impact sentence describing what will happen in this session.
+5. In `git-write-restricted` mode, the practical impact sentence MUST state that repeated non-escalated retries for the same Git metadata write are avoided.
+
+### Combined State Reference (User-Facing Examples)
+
+| Execution + Permission | User-facing runtime status summary |
+| --- | --- |
+| `parallel-worker` + `normal` | Runtime status: Parallel subtask execution (`parallel-worker`) + standard Git write capability (`normal`). Impact: independent tasks run concurrently and normal Git metadata writes can proceed. |
+| `parallel-worker` + `git-write-restricted` | Runtime status: Parallel subtask execution (`parallel-worker`) + restricted Git writes (`git-write-restricted`). Impact: independent tasks still run concurrently, but Git metadata writes use restricted/elevated handling after first lock-permission failure. |
+| `fallback-serial` + `normal` | Runtime status: Sequential fallback execution (`fallback-serial`) + standard Git write capability (`normal`). Impact: tasks run one-by-one due to runtime limits, while normal Git metadata writes can proceed. |
+| `fallback-serial` + `git-write-restricted` | Runtime status: Sequential fallback execution (`fallback-serial`) + restricted Git writes (`git-write-restricted`). Impact: tasks run one-by-one and Git metadata writes avoid repeated non-escalated retries after lock-permission failures. |
+
 ## Runtime Equivalence Hints (Reference; Verify Per Session)
 
 | Runtime | track/load | Worker dispatch | Follow-up | Wait/result | Close | Typical profile |

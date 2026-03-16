@@ -20,7 +20,7 @@ fi
 
 echo "Test 1: Runtime probe response..."
 set +e
-output=$(run_with_timeout 90 opencode run --print-logs "Use superpowers:using-superpowers. In at most 12 lines: (1) list runtime-native tools/signals available in this session, (2) map them to load_skill, track_tasks, spawn_worker, message_worker, wait_worker, close_worker, and (3) declare worker profile and execution mode. Explicitly state that abstract actions are not literal tool names." 2>&1)
+output=$(run_with_timeout 90 opencode run --print-logs "Use superpowers:using-superpowers. In at most 12 lines: (1) list runtime-native tools/signals available in this session, (2) map them to load_skill, track_tasks, spawn_worker, message_worker, wait_worker, close_worker, and (3) declare worker profile, execution mode, and permission mode, plus a user-facing runtime status summary combining execution + permission in plain language. Explicitly state that abstract actions are not literal tool names." 2>&1)
 exit_code=$?
 set -e
 
@@ -83,6 +83,22 @@ if echo "$output" | grep -Eqi "parallel-worker|fallback-serial"; then
     echo "  [PASS] response declares execution mode"
 else
     echo "  [FAIL] response missing execution mode declaration"
+    echo "$output" | sed 's/^/    /'
+    exit 1
+fi
+
+if echo "$output" | grep -Eqi "normal|git-write-restricted|permission mode"; then
+    echo "  [PASS] response declares permission mode"
+else
+    echo "  [FAIL] response missing permission mode declaration"
+    echo "$output" | sed 's/^/    /'
+    exit 1
+fi
+
+if echo "$output" | grep -Eqi "user-facing runtime status|plain language|what this means"; then
+    echo "  [PASS] response includes user-facing runtime summary"
+else
+    echo "  [FAIL] response missing user-facing runtime summary"
     echo "$output" | sed 's/^/    /'
     exit 1
 fi

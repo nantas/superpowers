@@ -107,6 +107,11 @@ REQUIRED_PATTERNS=(
     "Codex"
     "OpenCode"
     "Claude Code"
+    "Runtime Status Summary Contract"
+    "user-facing runtime status summary"
+    "plain-language execution behavior"
+    "plain-language git write capability"
+    "practical impact sentence"
 )
 
 MISSING=0
@@ -294,7 +299,7 @@ if [ "$INTEGRATION_SKIPPED" = false ]; then
     SMOKE_OUT="$TMP_DIR/smoke.txt"
 
     set +e
-    run_codex_exec "Use superpowers:using-superpowers. In one short answer, list: runtime adapter actions for task tracking and worker orchestration; the three orchestrator route names; execution mode names; permission mode names; and the required completion verification gate skill. Also include these exact phrases: 'wait is completion source of truth', 'no artifact polling', and 'wait-any needs pending_ids loop'." >"$SMOKE_OUT" 2>&1
+    run_codex_exec "Use superpowers:using-superpowers. In one short answer, list: runtime adapter actions for task tracking and worker orchestration; the three orchestrator route names; execution mode names; permission mode names; the required completion verification gate skill; and a user-facing runtime status summary that combines execution + permission state in plain language. Also include these exact phrases: 'wait is completion source of truth', 'no artifact polling', 'wait-any needs pending_ids loop', and 'user-facing runtime status summary'." >"$SMOKE_OUT" 2>&1
     SMOKE_EXIT=$?
     set -e
 
@@ -322,6 +327,7 @@ if [ "$INTEGRATION_SKIPPED" = false ]; then
             "wait is completion source of truth"
             "no artifact polling"
             "wait-any needs pending_ids loop"
+            "user-facing runtime status summary"
         )
 
         MISSING=0

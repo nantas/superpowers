@@ -39,3 +39,12 @@ If resolved worker profile is `unavailable`, do not skip checkpoints.
 ## Completion Gate
 
 No completion claim without `verification-before-completion` and fresh command evidence.
+
+## User-Facing Runtime Status
+
+When declaring runtime state, combine execution + permission into one user-facing line plus impact sentence.
+
+- `parallel-worker` + `normal`: independent tasks run concurrently; normal Git metadata writes expected to work.
+- `parallel-worker` + `git-write-restricted`: independent tasks run concurrently; Git metadata writes use restricted/elevated handling after lock-permission failures.
+- `fallback-serial` + `normal`: tasks run one-by-one due to runtime limits; normal Git metadata writes expected to work.
+- `fallback-serial` + `git-write-restricted`: tasks run one-by-one and Git metadata writes avoid repeated non-escalated retries after lock-permission failures.

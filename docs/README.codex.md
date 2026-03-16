@@ -108,6 +108,14 @@ Before selecting execution mode, probe available tools in the active session and
 3. If any worker action is unclear, run a minimal worker smoke probe.
 4. Choose `parallel-worker` when equivalent worker lifecycle semantics are available; otherwise choose `fallback-serial`.
 
+## User-Facing Runtime Status
+
+When reporting runtime state, combine execution + permission into one plain-language summary and include mode labels:
+
+- Execution: explain behavior users will observe, plus (`parallel-worker` or `fallback-serial`)
+- Permission: explain Git write capability, plus (`normal` or `git-write-restricted`)
+- Impact: one sentence describing practical consequences for this session
+
 ## Usage
 
 Skills are discovered automatically. Codex activates them when:
