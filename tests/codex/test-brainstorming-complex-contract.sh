@@ -29,6 +29,11 @@ REQUIRED_PATTERNS=(
     "selection question"
     "Context Drift"
     "re-open context discovery"
+    "User-Facing Communication Contract"
+    "user language"
+    "Adaptive Verbosity Rules"
+    "Term Mapping"
+    "next question purpose"
     "The terminal state is invoking writing-plans"
 )
 

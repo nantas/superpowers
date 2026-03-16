@@ -74,6 +74,49 @@ On drift:
 
 Do not continue approach selection while drift remains unresolved.
 
+## User-Facing Communication Contract (Mandatory)
+
+Keep internal reasoning strict, but communicate status in user language.
+
+Requirements for user-facing status before each question:
+
+1. Use the user's current language and phrasing style (do not force English labels).
+2. Describe current understanding in plain language, not internal-only jargon.
+3. State the next question purpose so the user knows why this question is asked now.
+4. If needed for precision, introduce term as local language + English once (for example: `信息掌握度 (context completeness)`), then default to local language.
+
+Do not expose internal gate mechanics without explanation. If you mention any internal term, immediately translate it to a user-understandable meaning.
+
+## Adaptive Verbosity Rules
+
+Use adaptive status depth:
+
+- default: concise status (1-2 short sentences before the question),
+- switch to detailed status when complexity rises or user asks why.
+
+Use detailed status when any trigger is true:
+
+- user asks for rationale, risks, or confidence,
+- conflicts are present in critical dimensions,
+- context drift was detected this turn,
+- completeness estimate decreased or progress stalls.
+
+Detailed status format:
+
+- confirmed understanding,
+- open gaps,
+- current judgment,
+- next question purpose.
+
+## Term Mapping (User Language)
+
+Map internal terms to user-facing phrasing in user language:
+
+- `context completeness` -> current understanding coverage,
+- `information-collection question` -> question to close a concrete gap,
+- `selection question` -> question to choose among valid options,
+- `Context Drift` -> newly introduced facts that change or challenge prior understanding.
+
 ## Workflow
 
 1. Explore repository context (files, docs, recent commits).
