@@ -115,6 +115,13 @@ For Codex multi-agent mode, map abstract actions to:
 | `wait_worker` | `wait` |
 | `close_worker` | `close_agent` |
 
+### Codex Context and Reliability Guardrails (Normative)
+
+1. For Codex-oriented worker dispatch, controllers SHOULD default to `fork_context=true` unless the worker prompt is already fully self-contained and isolating parent context is intentional.
+2. Even when `fork_context=true` is used, controllers MUST include a minimal task packet covering objective, scope boundary, prohibited scope, expected return format, and completion criteria.
+3. Controllers MUST define a worker time budget or phase timeout and switch to documented fallback behavior if the worker times out, drifts, or cannot complete reliably.
+4. In Codex, `close_agent` is cleanup only; controllers MUST NOT treat `close_agent` return payloads as proof of completion.
+
 ### Codex Wait Semantics (Normative)
 
 1. `wait(ids=[...])` returns when any listed worker reaches a final state (wait-any), not when all complete.
@@ -129,3 +136,4 @@ When resolved worker profile is `unavailable`:
 2. Keep the same stages (implement -> review -> fix -> re-review).
 3. Use `track_tasks` if available; otherwise maintain a manual checklist in responses.
 4. Keep outputs equivalent to multi-agent flow so process semantics stay stable.
+5. Preserve the same user-facing expectation statement, including when fallback-serial execution replaces worker orchestration.
