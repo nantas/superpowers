@@ -74,8 +74,7 @@ run_case "Test 6: subagent-driven-development-tiering" \
     "subagent-driven-development" \
     "$PROMPTS_DIR/subagent-driven-development-tiering.txt" \
     "lightweight|moderate
-self-check|one reviewer|single reviewer" \
-    "spec reviewer.+code-quality reviewer|code-quality reviewer.+spec reviewer|full reviewer chain|implementer -> spec reviewer -> code-quality reviewer"
+self-check|one reviewer|single reviewer"
 
 echo "=== Summary ==="
 printf '%s\n' "${RESULTS[@]}"

@@ -76,6 +76,7 @@ EOF
 
 # Run Claude with isolated environment
 LOG_FILE="$OUTPUT_DIR/claude-output.json"
+CONTENT_FILE="$OUTPUT_DIR/assistant-content.jsonl"
 cd "$PROJECT_DIR"
 
 echo "Plugin dir: $PLUGIN_DIR"
@@ -170,12 +171,14 @@ echo "Timestamp: $TIMESTAMP"
 
 CONTENT_OK=true
 
+grep -E '"type":"assistant"|"type":"result"' "$LOG_FILE" > "$CONTENT_FILE" || true
+
 if [ -n "$REQUIRED_REGEXES" ]; then
     echo ""
     echo "Checking required response patterns..."
     while IFS= read -r pattern; do
         [ -z "$pattern" ] && continue
-        if grep -Eqi "$pattern" "$LOG_FILE"; then
+        if grep -Eqi "$pattern" "$CONTENT_FILE"; then
             echo "PASS: matched required pattern /$pattern/"
         else
             echo "FAIL: missing required pattern /$pattern/"
@@ -189,7 +192,7 @@ if [ -n "$FORBIDDEN_REGEXES" ]; then
     echo "Checking forbidden response patterns..."
     while IFS= read -r pattern; do
         [ -z "$pattern" ] && continue
-        if grep -Eqi "$pattern" "$LOG_FILE"; then
+        if grep -Eqi "$pattern" "$CONTENT_FILE"; then
             echo "FAIL: matched forbidden pattern /$pattern/"
             CONTENT_OK=false
         else
