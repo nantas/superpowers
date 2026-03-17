@@ -10,6 +10,8 @@ set -euo pipefail
 SKILL_NAME="$1"
 PROMPT_FILE="$2"
 MAX_TURNS="${3:-3}"
+REQUIRED_REGEXES="${REQUIRED_REGEXES:-}"
+FORBIDDEN_REGEXES="${FORBIDDEN_REGEXES:-}"
 
 if [ -z "$SKILL_NAME" ] || [ -z "$PROMPT_FILE" ]; then
     echo "Usage: $0 <skill-name> <prompt-file> [max-turns]"
@@ -74,6 +76,7 @@ run_with_timeout 300 claude -p "$PROMPT" \
     --plugin-dir "$PLUGIN_DIR" \
     --dangerously-skip-permissions \
     --max-turns "$MAX_TURNS" \
+    --verbose \
     --output-format stream-json \
     > "$LOG_FILE" 2>&1
 CLAUDE_EXIT=$?
@@ -125,7 +128,37 @@ echo ""
 echo "Full log: $LOG_FILE"
 echo "Timestamp: $TIMESTAMP"
 
-if [ "$TRIGGERED" = "true" ]; then
+CONTENT_OK=true
+
+if [ -n "$REQUIRED_REGEXES" ]; then
+    echo ""
+    echo "Checking required response patterns..."
+    while IFS= read -r pattern; do
+        [ -z "$pattern" ] && continue
+        if grep -Eqi "$pattern" "$LOG_FILE"; then
+            echo "✅ PASS: matched required pattern /$pattern/"
+        else
+            echo "❌ FAIL: missing required pattern /$pattern/"
+            CONTENT_OK=false
+        fi
+    done <<< "$REQUIRED_REGEXES"
+fi
+
+if [ -n "$FORBIDDEN_REGEXES" ]; then
+    echo ""
+    echo "Checking forbidden response patterns..."
+    while IFS= read -r pattern; do
+        [ -z "$pattern" ] && continue
+        if grep -Eqi "$pattern" "$LOG_FILE"; then
+            echo "❌ FAIL: matched forbidden pattern /$pattern/"
+            CONTENT_OK=false
+        else
+            echo "✅ PASS: forbidden pattern absent /$pattern/"
+        fi
+    done <<< "$FORBIDDEN_REGEXES"
+fi
+
+if [ "$TRIGGERED" = "true" ] && [ "$CONTENT_OK" = "true" ]; then
     exit 0
 else
     exit 1

@@ -25,6 +25,38 @@ FAILED=0
 SKIPPED=0
 RESULTS=()
 
+run_case() {
+    local label="$1"
+    local skill="$2"
+    local prompt_file="$3"
+    local required_regexes="${4:-}"
+    local forbidden_regexes="${5:-}"
+
+    echo "Testing: $label"
+
+    set +e
+    REQUIRED_REGEXES="$required_regexes" \
+    FORBIDDEN_REGEXES="$forbidden_regexes" \
+    "$SCRIPT_DIR/run-test.sh" "$skill" "$prompt_file" 3 2>&1 | tee "/tmp/skill-test-${label// /-}.log"
+    RUN_EXIT=${PIPESTATUS[0]}
+    set -e
+
+    if [ "$RUN_EXIT" -eq 0 ]; then
+        PASSED=$((PASSED + 1))
+        RESULTS+=("✅ $label")
+    elif [ "$RUN_EXIT" -eq 2 ]; then
+        SKIPPED=$((SKIPPED + 1))
+        RESULTS+=("⚠️ $label")
+    else
+        FAILED=$((FAILED + 1))
+        RESULTS+=("❌ $label")
+    fi
+
+    echo ""
+    echo "---"
+    echo ""
+}
+
 for skill in "${SKILLS[@]}"; do
     prompt_file="$PROMPTS_DIR/${skill}.txt"
 
@@ -35,28 +67,13 @@ for skill in "${SKILLS[@]}"; do
         continue
     fi
 
-    echo "Testing: $skill"
-
-    set +e
-    "$SCRIPT_DIR/run-test.sh" "$skill" "$prompt_file" 3 2>&1 | tee "/tmp/skill-test-$skill.log"
-    RUN_EXIT=${PIPESTATUS[0]}
-    set -e
-
-    if [ "$RUN_EXIT" -eq 0 ]; then
-        PASSED=$((PASSED + 1))
-        RESULTS+=("✅ $skill")
-    elif [ "$RUN_EXIT" -eq 2 ]; then
-        SKIPPED=$((SKIPPED + 1))
-        RESULTS+=("⚠️ $skill")
-    else
-        FAILED=$((FAILED + 1))
-        RESULTS+=("❌ $skill")
-    fi
-
-    echo ""
-    echo "---"
-    echo ""
+    run_case "$skill" "$skill" "$prompt_file"
 done
+
+run_case \
+    "dispatching-parallel-agents context offload" \
+    "dispatching-parallel-agents" \
+    "$PROMPTS_DIR/context-offload-multi-agent.txt"
 
 echo ""
 echo "=== Summary ==="

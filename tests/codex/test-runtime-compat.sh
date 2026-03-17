@@ -198,8 +198,36 @@ fi
 
 echo ""
 
-echo "Test 1e: Subagent lifecycle template safeguards..."
+echo "Test 1f: Codex multi-agent reliability guardrails..."
+DISPATCH_SKILL_FILE="$REPO_ROOT/skills/dispatching-parallel-agents/SKILL.md"
 SDD_SKILL_FILE="$REPO_ROOT/skills/subagent-driven-development/SKILL.md"
+
+RELIABILITY_PATTERNS=(
+    "fork_context=true"
+    "pending_ids"
+    "wait-any"
+    "fallback"
+    "close_agent"
+)
+
+MISSING=0
+for pattern in "${RELIABILITY_PATTERNS[@]}"; do
+    if ! grep -qi "$pattern" "$RUNTIME_COMPAT_FILE" "$DISPATCH_SKILL_FILE" "$SDD_SKILL_FILE"; then
+        echo "    missing multi-agent reliability pattern: $pattern" | tee -a "$CONTRACT_OUT"
+        MISSING=1
+    fi
+done
+
+if [ "$MISSING" -eq 0 ]; then
+    pass "Codex multi-agent docs define fork, wait-any, fallback, and close safeguards"
+else
+    fail "Codex multi-agent docs missing required reliability safeguards"
+    sed 's/^/    /' "$CONTRACT_OUT"
+fi
+
+echo ""
+
+echo "Test 1e: Subagent lifecycle template safeguards..."
 IMPLEMENTER_PROMPT_FILE="$REPO_ROOT/skills/subagent-driven-development/implementer-prompt.md"
 SPEC_REVIEWER_PROMPT_FILE="$REPO_ROOT/skills/subagent-driven-development/spec-reviewer-prompt.md"
 QUALITY_REVIEWER_PROMPT_FILE="$REPO_ROOT/skills/subagent-driven-development/code-quality-reviewer-prompt.md"

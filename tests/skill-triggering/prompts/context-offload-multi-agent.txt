@@ -1,0 +1,5 @@
+I need help investigating two separate failures in different parts of the repo.
+
+Each one requires reading a lot of files and I mostly want to save main-session context, not necessarily make the work faster.
+
+Please choose the best workflow for that situation.
