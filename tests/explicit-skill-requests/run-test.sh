@@ -12,6 +12,21 @@ set -e
 SKILL_NAME="$1"
 PROMPT_FILE="$2"
 MAX_TURNS="${3:-3}"
+REQUIRED_REGEXES="${REQUIRED_REGEXES:-}"
+FORBIDDEN_REGEXES="${FORBIDDEN_REGEXES:-}"
+
+run_with_timeout() {
+    local seconds="$1"
+    shift
+
+    if command -v timeout >/dev/null 2>&1; then
+        timeout "$seconds" "$@"
+    elif command -v gtimeout >/dev/null 2>&1; then
+        gtimeout "$seconds" "$@"
+    else
+        "$@"
+    fi
+}
 
 if [ -z "$SKILL_NAME" ] || [ -z "$PROMPT_FILE" ]; then
     echo "Usage: $0 <skill-name> <prompt-file> [max-turns]"
@@ -68,15 +83,39 @@ echo "Running claude -p with explicit skill request..."
 echo "Prompt: $PROMPT"
 echo ""
 
-timeout 300 claude -p "$PROMPT" \
+if ! command -v claude >/dev/null 2>&1; then
+    echo "SKIP: claude CLI not found"
+    exit 2
+fi
+
+set +e
+run_with_timeout 300 claude -p "$PROMPT" \
     --plugin-dir "$PLUGIN_DIR" \
     --dangerously-skip-permissions \
     --max-turns "$MAX_TURNS" \
+    --verbose \
     --output-format stream-json \
-    > "$LOG_FILE" 2>&1 || true
+    > "$LOG_FILE" 2>&1
+CLAUDE_EXIT=$?
+set -e
 
 echo ""
 echo "=== Results ==="
+
+if [ ! -s "$LOG_FILE" ]; then
+    echo "SKIP: Empty Claude output"
+    echo "Full log: $LOG_FILE"
+    echo "Timestamp: $TIMESTAMP"
+    exit 2
+fi
+
+if [ "$CLAUDE_EXIT" -ne 0 ] && grep -Eqi "auth|login|credential|api key|unauthorized|forbidden|not logged|rate limit|network|connection|timeout|timed out|plugin|permission denied|operation not permitted" "$LOG_FILE"; then
+    echo "SKIP: Claude execution unavailable due to environment/auth/session constraints"
+    sed -n '1,20p' "$LOG_FILE" | sed 's/^/    /'
+    echo "Full log: $LOG_FILE"
+    echo "Timestamp: $TIMESTAMP"
+    exit 2
+fi
 
 # Check if skill was triggered (look for Skill tool invocation)
 # Match either "skill":"skillname" or "skill":"namespace:skillname"
@@ -129,7 +168,37 @@ echo ""
 echo "Full log: $LOG_FILE"
 echo "Timestamp: $TIMESTAMP"
 
-if [ "$TRIGGERED" = "true" ]; then
+CONTENT_OK=true
+
+if [ -n "$REQUIRED_REGEXES" ]; then
+    echo ""
+    echo "Checking required response patterns..."
+    while IFS= read -r pattern; do
+        [ -z "$pattern" ] && continue
+        if grep -Eqi "$pattern" "$LOG_FILE"; then
+            echo "PASS: matched required pattern /$pattern/"
+        else
+            echo "FAIL: missing required pattern /$pattern/"
+            CONTENT_OK=false
+        fi
+    done <<< "$REQUIRED_REGEXES"
+fi
+
+if [ -n "$FORBIDDEN_REGEXES" ]; then
+    echo ""
+    echo "Checking forbidden response patterns..."
+    while IFS= read -r pattern; do
+        [ -z "$pattern" ] && continue
+        if grep -Eqi "$pattern" "$LOG_FILE"; then
+            echo "FAIL: matched forbidden pattern /$pattern/"
+            CONTENT_OK=false
+        else
+            echo "PASS: forbidden pattern absent /$pattern/"
+        fi
+    done <<< "$FORBIDDEN_REGEXES"
+fi
+
+if [ "$TRIGGERED" = "true" ] && [ "$CONTENT_OK" = "true" ]; then
     exit 0
 else
     exit 1

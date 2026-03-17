@@ -1,0 +1,5 @@
+I have a small plan with one narrow, low-risk task in a single file.
+
+Use subagent-driven-development, but explain what workflow tier you would choose for this task and why.
+
+Do not assume I want the heaviest review flow if the task does not justify it.

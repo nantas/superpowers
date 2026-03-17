@@ -1,0 +1,5 @@
+I already have a written implementation plan and I want to execute it with subagent-driven-development.
+
+My priority is reducing main-session context pressure and keeping execution reliable, not making it faster.
+
+Before starting, tell me exactly what workflow tier you would use, what stages will run, and what tradeoff I should expect.

@@ -2,7 +2,7 @@
 # Run all explicit skill request tests
 # Usage: ./run-all.sh
 
-set -e
+set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROMPTS_DIR="$SCRIPT_DIR/prompts"
@@ -12,54 +12,73 @@ echo ""
 
 PASSED=0
 FAILED=0
-RESULTS=""
+RESULTS=()
+
+run_case() {
+    local label="$1"
+    local skill="$2"
+    local prompt_file="$3"
+    local required_regexes="${4:-}"
+    local forbidden_regexes="${5:-}"
+
+    echo ">>> $label"
+
+    set +e
+    REQUIRED_REGEXES="$required_regexes" \
+    FORBIDDEN_REGEXES="$forbidden_regexes" \
+    "$SCRIPT_DIR/run-test.sh" "$skill" "$prompt_file"
+    RUN_EXIT=$?
+    set -e
+
+    if [ "$RUN_EXIT" -eq 0 ]; then
+        PASSED=$((PASSED + 1))
+        RESULTS+=("PASS: $label")
+    elif [ "$RUN_EXIT" -eq 2 ]; then
+        RESULTS+=("SKIP: $label")
+    else
+        FAILED=$((FAILED + 1))
+        RESULTS+=("FAIL: $label")
+    fi
+    echo ""
+}
 
 # Test: subagent-driven-development, please
-echo ">>> Test 1: subagent-driven-development-please"
-if "$SCRIPT_DIR/run-test.sh" "subagent-driven-development" "$PROMPTS_DIR/subagent-driven-development-please.txt"; then
-    PASSED=$((PASSED + 1))
-    RESULTS="$RESULTS\nPASS: subagent-driven-development-please"
-else
-    FAILED=$((FAILED + 1))
-    RESULTS="$RESULTS\nFAIL: subagent-driven-development-please"
-fi
-echo ""
+run_case "Test 1: subagent-driven-development-please" \
+    "subagent-driven-development" \
+    "$PROMPTS_DIR/subagent-driven-development-please.txt"
 
 # Test: use systematic-debugging
-echo ">>> Test 2: use-systematic-debugging"
-if "$SCRIPT_DIR/run-test.sh" "systematic-debugging" "$PROMPTS_DIR/use-systematic-debugging.txt"; then
-    PASSED=$((PASSED + 1))
-    RESULTS="$RESULTS\nPASS: use-systematic-debugging"
-else
-    FAILED=$((FAILED + 1))
-    RESULTS="$RESULTS\nFAIL: use-systematic-debugging"
-fi
-echo ""
+run_case "Test 2: use-systematic-debugging" \
+    "systematic-debugging" \
+    "$PROMPTS_DIR/use-systematic-debugging.txt"
 
 # Test: please use brainstorming
-echo ">>> Test 3: please-use-brainstorming"
-if "$SCRIPT_DIR/run-test.sh" "brainstorming" "$PROMPTS_DIR/please-use-brainstorming.txt"; then
-    PASSED=$((PASSED + 1))
-    RESULTS="$RESULTS\nPASS: please-use-brainstorming"
-else
-    FAILED=$((FAILED + 1))
-    RESULTS="$RESULTS\nFAIL: please-use-brainstorming"
-fi
-echo ""
+run_case "Test 3: please-use-brainstorming" \
+    "brainstorming" \
+    "$PROMPTS_DIR/please-use-brainstorming.txt"
 
 # Test: mid-conversation execute plan
-echo ">>> Test 4: mid-conversation-execute-plan"
-if "$SCRIPT_DIR/run-test.sh" "subagent-driven-development" "$PROMPTS_DIR/mid-conversation-execute-plan.txt"; then
-    PASSED=$((PASSED + 1))
-    RESULTS="$RESULTS\nPASS: mid-conversation-execute-plan"
-else
-    FAILED=$((FAILED + 1))
-    RESULTS="$RESULTS\nFAIL: mid-conversation-execute-plan"
-fi
-echo ""
+run_case "Test 4: mid-conversation-execute-plan" \
+    "subagent-driven-development" \
+    "$PROMPTS_DIR/mid-conversation-execute-plan.txt"
+
+run_case "Test 5: subagent-driven-development-expectations" \
+    "subagent-driven-development" \
+    "$PROMPTS_DIR/subagent-driven-development-expectations.txt" \
+    "lightweight|moderate|high-risk
+implementer
+slower|longer
+context offload|context savings|main-session context|reliability"
+
+run_case "Test 6: subagent-driven-development-tiering" \
+    "subagent-driven-development" \
+    "$PROMPTS_DIR/subagent-driven-development-tiering.txt" \
+    "lightweight|moderate
+self-check|one reviewer|single reviewer" \
+    "spec reviewer.+code-quality reviewer|code-quality reviewer.+spec reviewer|full reviewer chain|implementer -> spec reviewer -> code-quality reviewer"
 
 echo "=== Summary ==="
-echo -e "$RESULTS"
+printf '%s\n' "${RESULTS[@]}"
 echo ""
 echo "Passed: $PASSED"
 echo "Failed: $FAILED"
