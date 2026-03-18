@@ -12,6 +12,8 @@ Use this workflow when multiple independent domains would consume too much main-
 **Core principle:** one worker per independent high-context domain.
 
 **Runtime adapter:** use worker lifecycle actions from `../_shared/runtime-compat.md`.
+This skill requires a completed `using-superpowers preflight`.
+If preflight cache is absent, stop and invoke using-superpowers first.
 
 ## When to Use
 
@@ -27,6 +29,11 @@ Avoid when failures may share a root cause.
 This workflow is for context offload first. It may reduce elapsed time, but speedup is optional and not promised.
 
 ## Pattern
+
+### 0) Confirm preflight
+
+1. Verify `using-superpowers preflight` already ran for this session.
+2. If preflight cache is absent, stop and invoke using-superpowers first.
 
 ### 1) Partition by domain
 

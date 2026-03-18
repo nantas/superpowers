@@ -14,14 +14,19 @@ Load plan, review critically, execute tasks in batches, report for review betwee
 **Runtime adapter:** Use abstract actions from `../_shared/runtime-compat.md` (`track_tasks`, and worker actions when needed).
 
 **Announce at start:** "I'm using the executing-plans skill to implement this plan."
+This skill requires a completed `using-superpowers preflight`.
+If preflight cache is absent, stop and invoke using-superpowers first.
 
 ## The Process
 
 ### Step 1: Load and Review Plan
-1. Read plan file
-2. Review critically - identify any questions or concerns about the plan
-3. If concerns: Raise them with your human partner before starting
-4. If no concerns: initialize `track_tasks` and proceed
+1. Verify `using-superpowers preflight` already ran for this session.
+2. If preflight cache is absent, stop and invoke using-superpowers first.
+3. Read plan file
+4. Review critically - identify any questions or concerns about the plan
+5. Honor preflight workspace constraints before starting; if cache reports `worktree-exempt=true`, do not invoke `using-git-worktrees`
+6. If concerns: Raise them with your human partner before starting
+7. If no concerns: initialize `track_tasks` and proceed
 
 ### Step 2: Execute Batch
 **Default: First 3 tasks**
@@ -81,6 +86,6 @@ After all tasks complete and verified:
 ## Integration
 
 **Required workflow skills:**
-- **superpowers:using-git-worktrees** - REQUIRED: Set up isolated workspace before starting
+- **superpowers:using-git-worktrees** - REQUIRED unless preflight cached `worktree-exempt=true`; large Unity/monorepo repos must stay on a non-worktree branch workflow
 - **superpowers:writing-plans** - Creates the plan this skill executes
 - **superpowers:finishing-a-development-branch** - Complete development after all tasks

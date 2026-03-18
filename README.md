@@ -92,7 +92,7 @@ Start a new session in your chosen platform and ask for something that should tr
 
    Optional advanced variant: **brainstorming-complex** for context-completeness scoring, drift detection, and gated clarification before approach selection.
 
-2. **using-git-worktrees** - Activates after design approval. Creates isolated workspace on new branch, runs project setup, verifies clean test baseline.
+2. **using-git-worktrees** - Activates after design approval for normal repos. Creates isolated workspace on new branch, runs project setup, verifies clean test baseline. Large Unity/monorepo repos classified as `worktree-exempt` skip this workflow.
 
 3. **writing-plans** - Activates with approved design. Breaks work into bite-sized tasks (2-5 minutes each). Every task has exact file paths, complete code, verification steps.
 

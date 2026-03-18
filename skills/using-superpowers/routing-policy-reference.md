@@ -23,8 +23,12 @@ Run before first worker spawn:
 - known failing commands and exclusions
 - critical command availability
 
+Orchestrators and `using-git-worktrees` must treat this as a hard gate.
+If preflight cache is absent, stop and invoke `using-superpowers` before continuing.
+
 For Unity/very large repos, prefer quick metadata probes (`git ls-files`, `git count-objects -v`, Unity marker paths) before any heavy scan.
 If large-worktree risk is detected, ask whether to skip heavy baseline checks and record that choice in exclusions.
+If large-worktree risk is detected, set `worktree-exempt=true` and bypass `using-git-worktrees` for that session.
 If a large-worktree cache exists, reuse it and do not re-ask unless context changes.
 
 ## Fallback Rules

@@ -11,6 +11,10 @@ Create isolated branch workspaces without switching the current checkout.
 
 **Core principle:** deterministic location selection + ignore safety + clean baseline verification.
 
+If preflight cached `worktree-exempt=true`, do not create a worktree. Report the exemption and return control to the caller.
+This skill requires a completed `using-superpowers preflight`.
+If preflight cache is absent, stop and invoke using-superpowers first.
+
 ## Directory Selection Priority
 
 1. existing `.worktrees/`
@@ -34,11 +38,15 @@ Global location (`~/.config/superpowers/worktrees/...`) does not require repo ig
 
 ## Creation Steps
 
-1. Detect project name from repo root.
-2. Build full worktree path from selected location and branch name.
-3. Create worktree with new branch.
-4. Run setup based on detected stack files (`package.json`, `Cargo.toml`, `pyproject.toml`, `go.mod`).
-5. Run baseline tests.
+1. Verify `using-superpowers preflight` already ran before any path or Git mutation.
+2. If preflight cache is absent, stop and invoke using-superpowers first.
+3. Check preflight cache for large-worktree decisions.
+4. If `worktree-exempt=true`, report that this repo must use a non-worktree branch workflow and stop.
+5. Detect project name from repo root.
+6. Build full worktree path from selected location and branch name.
+7. Create worktree with new branch.
+8. Run setup based on detected stack files (`package.json`, `Cargo.toml`, `pyproject.toml`, `go.mod`).
+9. Run baseline tests.
 
 If large-worktree cache reports `large-worktree-risk=true` and `heavy-checks-skipped=true`, skip baseline tests and report minimal verification only.
 
@@ -71,3 +79,5 @@ Common companions:
 - `superpowers:subagent-driven-development`
 - `superpowers:executing-plans`
 - `superpowers:finishing-a-development-branch`
+
+Callers must honor `worktree-exempt=true` and skip this skill when that cache flag is set.

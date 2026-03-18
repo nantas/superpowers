@@ -135,11 +135,16 @@ echo "Test 1c: Large worktree guard policy presence..."
 USING_SUPERPOWERS_FILE="$REPO_ROOT/skills/using-superpowers/SKILL.md"
 ROUTING_POLICY_FILE="$REPO_ROOT/skills/using-superpowers/routing-policy-reference.md"
 USING_GIT_WORKTREES_FILE="$REPO_ROOT/skills/using-git-worktrees/SKILL.md"
+WRITING_PLANS_FILE="$REPO_ROOT/skills/writing-plans/SKILL.md"
+EXECUTING_PLANS_FILE="$REPO_ROOT/skills/executing-plans/SKILL.md"
+SDD_SKILL_FILE="$REPO_ROOT/skills/subagent-driven-development/SKILL.md"
+DISPATCH_SKILL_FILE="$REPO_ROOT/skills/dispatching-parallel-agents/SKILL.md"
 
 LARGE_GUARD_PATTERNS=(
     "repo/worktree scale risk"
     "large-worktree-risk"
     "large-worktree cache"
+    "worktree-exempt"
     "Skip heavy baseline checks"
     "git ls-files | wc -l"
     "git count-objects -v"
@@ -167,8 +172,46 @@ if ! grep -qi "large-worktree cache" "$USING_GIT_WORKTREES_FILE"; then
     fail "using-git-worktrees missing large-worktree cache reuse guidance"
 fi
 
+if ! grep -qi "worktree-exempt" "$USING_SUPERPOWERS_FILE" "$ROUTING_POLICY_FILE" "$USING_GIT_WORKTREES_FILE"; then
+    fail "large-worktree policy missing worktree exemption guidance"
+fi
+
 if ! grep -qi "heavy-checks-skipped" "$USING_SUPERPOWERS_FILE"; then
     fail "using-superpowers missing heavy-checks-skipped cache field"
+fi
+
+if ! grep -qi "worktree-exempt" "$WRITING_PLANS_FILE" "$EXECUTING_PLANS_FILE" "$SDD_SKILL_FILE"; then
+    fail "plan workflow skills missing worktree exemption guidance"
+fi
+
+PREFLIGHT_GATE_FILES=(
+    "$USING_GIT_WORKTREES_FILE"
+    "$WRITING_PLANS_FILE"
+    "$EXECUTING_PLANS_FILE"
+    "$SDD_SKILL_FILE"
+    "$DISPATCH_SKILL_FILE"
+)
+
+MISSING=0
+for file in "${PREFLIGHT_GATE_FILES[@]}"; do
+    if ! grep -qi "using-superpowers preflight" "$file"; then
+        echo "    missing preflight gate phrase in: $file"
+        MISSING=1
+    fi
+    if ! grep -qi "If preflight cache is absent" "$file"; then
+        echo "    missing absent-cache stop phrase in: $file"
+        MISSING=1
+    fi
+    if ! grep -qi "invoke using-superpowers first" "$file"; then
+        echo "    missing preflight fallback phrase in: $file"
+        MISSING=1
+    fi
+done
+
+if [ "$MISSING" -eq 0 ]; then
+    pass "workflow skills require using-superpowers preflight before proceeding"
+else
+    fail "workflow skills missing using-superpowers preflight gate language"
 fi
 
 echo ""
@@ -199,9 +242,6 @@ fi
 echo ""
 
 echo "Test 1f: Codex multi-agent reliability guardrails..."
-DISPATCH_SKILL_FILE="$REPO_ROOT/skills/dispatching-parallel-agents/SKILL.md"
-SDD_SKILL_FILE="$REPO_ROOT/skills/subagent-driven-development/SKILL.md"
-
 RELIABILITY_PATTERNS=(
     "fork_context=true"
     "pending_ids"

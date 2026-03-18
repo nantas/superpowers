@@ -2,12 +2,13 @@
 
 ```text
 1) Announce using-git-worktrees workflow.
-2) Detect `.worktrees/` exists.
-3) Verify `.worktrees/` is ignored.
-4) Create branch worktree:
+2) Check large-worktree cache. If `worktree-exempt=true`, report exemption and stop.
+3) Detect `.worktrees/` exists.
+4) Verify `.worktrees/` is ignored.
+5) Create branch worktree:
    git worktree add .worktrees/auth -b feature/auth
-5) Run project setup and baseline tests.
-6) Report path and baseline status.
+6) Run project setup and baseline tests.
+7) Report path and baseline status.
 ```
 
 Example report:

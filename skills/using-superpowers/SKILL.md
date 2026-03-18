@@ -40,6 +40,9 @@ When work involves a written plan or 2+ independent domains:
 3. Before any completion claim, invoke `verification-before-completion` with fresh evidence.
 4. Run fallback-serial only when the resolved worker profile is `unavailable` after capability resolution/probing.
 
+Downstream workflow skills must treat this `using-superpowers preflight` as a hard gate.
+If preflight cache is absent, they must stop and invoke using-superpowers first.
+
 ### Preflight: Large Unity/Monorepo Guard
 
 Use fast probes first (index/metadata only). Avoid recursive scans unless user requests them.
@@ -58,7 +61,10 @@ When `large-worktree-risk` is true, ask before expensive checks:
 "Large Unity/monorepo detected. Skip heavy baseline checks for this run?"
 If skipped, record this under known constraints/exclusions and proceed with minimal verification.
 
-Large-worktree cache: Cache: large-worktree-risk=<true/false>, heavy-checks-skipped=<true/false>
+When `large-worktree-risk` is true, also classify the repo as `worktree-exempt=true`.
+Do not route that session through `using-git-worktrees`; keep the selected orchestrator, but use an in-place or otherwise user-approved non-worktree branch workflow.
+
+Preflight cache: Cache: large-worktree-risk=<true/false>, worktree-exempt=<true/false>, heavy-checks-skipped=<true/false>
 
 ## Required Runtime Status Summary (Once Per Session)
 

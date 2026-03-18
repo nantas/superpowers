@@ -13,7 +13,9 @@ Assume they are a skilled developer, but know almost nothing about our toolset o
 
 **Announce at start:** "I'm using the writing-plans skill to create the implementation plan."
 
-**Context:** This should be run in a dedicated worktree (created by brainstorming skill).
+**Context:** This should be run in an isolated workspace. Default to a dedicated worktree, but if preflight cached `worktree-exempt=true`, use the current checkout or another user-approved non-worktree branch workflow.
+This skill requires a completed `using-superpowers preflight` so workspace constraints are already known.
+If preflight cache is absent, stop and invoke using-superpowers first.
 
 **Save plans to:** `docs/plans/YYYY-MM-DD-<feature-name>.md`
 
@@ -112,5 +114,5 @@ After saving the plan, offer execution choice:
 - Fresh subagent per task + code review
 
 **If Parallel Session chosen:**
-- Guide them to open new session in worktree
+- Guide them to open new session in the isolated workspace chosen by preflight; if `worktree-exempt=true`, do not require a worktree
 - **REQUIRED SUB-SKILL:** New session uses superpowers:executing-plans

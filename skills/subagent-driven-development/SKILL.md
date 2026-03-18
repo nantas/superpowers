@@ -10,6 +10,8 @@ Execute a plan in this session with fresh worker context per task and risk-tiere
 **Core principle:** choose the lightest gate that still preserves reliability, then repeat that gate per task.
 
 **Runtime adapter:** `track_tasks`, `spawn_worker`, `message_worker`, `wait_worker`, `close_worker` (see `../_shared/runtime-compat.md`).
+This skill requires a completed `using-superpowers preflight`.
+If preflight cache is absent, stop and invoke using-superpowers first.
 
 ## When to Use
 
@@ -51,19 +53,21 @@ Default to the lightest tier that the task can safely justify. Do not default sm
 
 ## Process
 
-1. Read plan once and extract all tasks with full text/context.
-2. Initialize `track_tasks` for all tasks.
-3. Announce the selected tier, stage sequence, and expected time/reliability tradeoff to the user.
-4. For each task, dispatch workers with exact task text + a minimal task packet (goal, scope, prohibited scope, expected return format, completion criteria).
-5. For each task, run the selected gate sequence:
+1. Verify `using-superpowers preflight` already ran for this session.
+2. If preflight cache is absent, stop and invoke using-superpowers first.
+3. Read plan once and extract all tasks with full text/context.
+4. Initialize `track_tasks` for all tasks.
+5. Announce the selected tier, stage sequence, and expected time/reliability tradeoff to the user.
+6. For each task, dispatch workers with exact task text + a minimal task packet (goal, scope, prohibited scope, expected return format, completion criteria).
+7. For each task, run the selected gate sequence:
    - dispatch implementer worker with exact task text + context; for Codex-oriented runs, prefer `fork_context=true`,
    - wait for implementer final status via `wait_worker`,
    - close implementer worker via `close_worker`,
    - if tier is `moderate`: dispatch one reviewer, wait, close, and loop until approved,
    - if tier is `high-risk`: dispatch spec reviewer, wait, close, loop until approved; then dispatch code-quality reviewer, wait, close, loop until approved,
    - mark task complete.
-6. After all tasks, run final overall code review.
-7. Hand off to `superpowers:finishing-a-development-branch`.
+8. After all tasks, run final overall code review.
+9. Hand off to `superpowers:finishing-a-development-branch`.
 
 ## Worker Prompt Assets
 
@@ -140,7 +144,7 @@ Task N (high-risk) -> Spec reviewer finds gap -> Implementer fixes -> Spec revie
 
 Required companion skills:
 
-- `superpowers:using-git-worktrees`
+- `superpowers:using-git-worktrees` unless preflight cached `worktree-exempt=true`; large Unity/monorepo repos must not be forced through the worktree workflow
 - `superpowers:requesting-code-review`
 - `superpowers:finishing-a-development-branch`
 

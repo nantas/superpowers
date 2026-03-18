@@ -91,7 +91,7 @@ Updated `~/.codex/skills/` reference (deprecated) to `~/.agents/skills/` for nat
 
 **Worktree isolation now required before implementation**
 
-Added `using-git-worktrees` as a required skill for both `subagent-driven-development` and `executing-plans`. Implementation workflows now explicitly require setting up an isolated worktree before starting work, preventing accidental work directly on main.
+Added `using-git-worktrees` as the default setup skill for both `subagent-driven-development` and `executing-plans`. Implementation workflows normally set up an isolated worktree before starting work, but large Unity/monorepo repos classified as `worktree-exempt` skip that workflow.
 
 **Main branch protection softened to require explicit consent**
 
