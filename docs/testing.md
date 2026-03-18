@@ -60,6 +60,14 @@ Enable integration variants:
 ./tests/explicit-skill-requests/run-all.sh
 ```
 
+### Multi-Agent Reliability Coverage
+
+Recent Codex-oriented multi-agent coverage now includes:
+
+- `tests/codex/test-runtime-compat.sh`: verifies Codex multi-agent reliability safeguards such as `fork_context=true` guidance, wait-any `pending_ids` handling, timeout/fallback language, and `close_agent` cleanup semantics.
+- `tests/explicit-skill-requests/run-all.sh`: verifies `subagent-driven-development` explains workflow tiering, stage sequence, likely slowdown, and context-offload / reliability tradeoffs when explicitly requested.
+- `tests/skill-triggering/run-test.sh dispatching-parallel-agents tests/skill-triggering/prompts/context-offload-multi-agent.txt`: verifies context-offload intent can trigger the parallel-agent workflow even without a speed-first framing.
+
 ### Integration Tests
 
 Integration tests execute real Claude Code sessions with actual skills:
