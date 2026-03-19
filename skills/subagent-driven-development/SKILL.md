@@ -5,7 +5,7 @@ description: Use when executing implementation plans with independent tasks in t
 
 # Subagent-Driven Development
 
-Execute a plan in this session with fresh worker context per task and risk-tiered review gates.
+Execute a plan in this session with risk-tiered review gates.
 
 **Core principle:** choose the lightest gate that still preserves reliability, then repeat that gate per task.
 
@@ -15,23 +15,13 @@ If preflight cache is absent, stop and invoke using-superpowers first.
 
 ## When to Use
 
-Use when:
-
-- a written plan already exists,
-- tasks are mostly independent,
-- you want to offload task context from the main session,
-- you want to stay in the current session.
+Use when a written plan already exists, tasks are mostly independent, and you want in-session context offload.
 
 Use `executing-plans` instead for handoff/batch execution in a separate session.
 
 ## User Expectation Statement
 
-Before dispatching any worker, the controller MUST tell the user:
-
-1. which workflow tier will run (`lightweight`, `moderate`, or `high-risk`),
-2. the planned stage sequence,
-3. that this workflow is being chosen for context offload and reliability,
-4. that it may be slower or longer-running than direct main-session execution.
+Before dispatching any worker, the controller MUST tell the user which tier will run (`lightweight`, `moderate`, or `high-risk`), the planned stage sequence, that this workflow is being chosen for context offload/reliability, and that it may be slower than direct main-session execution.
 
 Do not assume "subagent" implies parallel speedup.
 
@@ -49,7 +39,7 @@ Choose one tier per task or task batch:
    - implementer -> spec reviewer -> code-quality reviewer
    - use for cross-module, high-impact, or ambiguity-heavy work
 
-Default to the lightest tier that the task can safely justify. Do not default small tasks to the full reviewer chain.
+Default to the lightest safe tier. Do not default small tasks to the full reviewer chain.
 
 ## Process
 
@@ -126,19 +116,7 @@ Always:
 - tell the user when the workflow trades speed for reliability/context isolation,
 - enforce re-review after each fix round.
 
-## Example
-
 A full walkthrough is in `example-workflow.md`.
-
-Minimal sketch:
-
-```text
-Task N (lightweight) -> Implementer completes + self-check -> mark task done
-Task N (moderate) -> Implementer completes -> one reviewer approves
-Task N (high-risk) -> Spec reviewer finds gap -> Implementer fixes -> Spec reviewer approves
-                   -> Code reviewer finds quality issue -> Implementer fixes -> Code reviewer approves
-      -> mark task done
-```
 
 ## Integration
 
