@@ -37,11 +37,20 @@ When work involves a written plan or 2+ independent domains:
    - known constraints/exclusions
    - branch/worktree readiness
    - repo/worktree scale risk (Unity/monorepo guard)
+   - `request_user_input` availability for clarification-heavy workflows
 3. Before any completion claim, invoke `verification-before-completion` with fresh evidence.
 4. Run fallback-serial only when the resolved worker profile is `unavailable` after capability resolution/probing.
 
 Downstream workflow skills must treat this `using-superpowers preflight` as a hard gate.
 If preflight cache is absent, they must stop and invoke using-superpowers first.
+
+### Preflight: `request_user_input` Availability
+
+In Codex agent environments, check whether `request_user_input` is available before starting `brainstorming` or `brainstorming-complex`.
+
+- If available, prioritize it for user feedback during clarification loops.
+- If unavailable, remind the user to enable it in settings before continuing with a long question sequence.
+- When using it, combine simple related questions into one submission instead of spreading them across multiple turns.
 
 ### Preflight: Large Unity/Monorepo Guard
 

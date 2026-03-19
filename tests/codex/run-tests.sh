@@ -25,6 +25,7 @@ if [ "${#RUNTIME_COMPAT_ARGS[@]}" -gt 0 ]; then
 else
     bash "$SCRIPT_DIR/test-runtime-compat.sh"
 fi
+bash "$SCRIPT_DIR/test-brainstorming-contract.sh"
 bash "$SCRIPT_DIR/test-brainstorming-complex-contract.sh"
 bash "$SCRIPT_DIR/test-skill-context-budget.sh"
 

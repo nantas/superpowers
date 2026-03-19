@@ -22,6 +22,7 @@ Run before first worker spawn:
 - dependency/tooling baseline
 - known failing commands and exclusions
 - critical command availability
+- `request_user_input` availability for clarification-heavy skills
 
 Orchestrators and `using-git-worktrees` must treat this as a hard gate.
 If preflight cache is absent, stop and invoke `using-superpowers` before continuing.
@@ -30,6 +31,7 @@ For Unity/very large repos, prefer quick metadata probes (`git ls-files`, `git c
 If large-worktree risk is detected, ask whether to skip heavy baseline checks and record that choice in exclusions.
 If large-worktree risk is detected, set `worktree-exempt=true` and bypass `using-git-worktrees` for that session.
 If a large-worktree cache exists, reuse it and do not re-ask unless context changes.
+For Codex brainstorming workflows, check whether `request_user_input` is available; if not, tell the user to enable it in settings before running a long clarification loop.
 
 ## Fallback Rules
 

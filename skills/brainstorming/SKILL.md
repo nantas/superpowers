@@ -59,9 +59,16 @@ digraph brainstorming {
 **Understanding the idea:**
 - Check out the current project state first (files, docs, recent commits)
 - Ask questions one at a time to refine the idea
+- In Codex agent environments, prioritize `request_user_input` to gather user feedback when the tool is available
+- If you have a series of simple, tightly related questions, combine them into one `request_user_input` submission to save context and reduce back-and-forth
 - Prefer multiple choice questions when possible, but open-ended is fine too
 - Only one question per message - if a topic needs more exploration, break it into multiple questions
 - Focus on understanding: purpose, constraints, success criteria
+
+**Codex clarification rule:**
+- Prioritize `request_user_input` over plain-text questioning when you need structured user feedback
+- If `request_user_input` is unavailable, tell the user to enable it in settings before continuing with a longer clarification loop
+- Keep each `request_user_input` submission short; batch only simple questions that belong to the same decision boundary
 
 **Exploring approaches:**
 - Propose 2-3 different approaches with trade-offs

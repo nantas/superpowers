@@ -53,6 +53,9 @@ Gate rules:
 2. If any critical dimension is `unknown`/`conflict`, ask only an information-collection question.
 3. Ask a selection question only after gate conditions are met.
 4. Keep one question per message.
+5. In Codex agent environments, prioritize `request_user_input` when it is available.
+6. If you need several simple questions to resolve the same gate, combine them into one `request_user_input` submission to save context.
+7. If `request_user_input` is unavailable, tell the user to enable it in settings before continuing with an extended clarification loop.
 
 ## Context Drift (Mandatory Re-entry)
 

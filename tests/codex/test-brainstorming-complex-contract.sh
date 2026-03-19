@@ -34,6 +34,10 @@ REQUIRED_PATTERNS=(
     "Adaptive Verbosity Rules"
     "Term Mapping"
     "next question purpose"
+    "request_user_input"
+    "Prioritize"
+    "combine"
+    "simple questions"
     "The terminal state is invoking writing-plans"
 )
 

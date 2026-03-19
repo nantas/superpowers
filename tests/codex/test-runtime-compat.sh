@@ -216,6 +216,30 @@ fi
 
 echo ""
 
+echo "Test 1c2: request_user_input preflight policy presence..."
+REQUEST_INPUT_PATTERNS=(
+    "request_user_input"
+    "If unavailable"
+    "settings"
+    "enable"
+)
+
+MISSING=0
+for pattern in "${REQUEST_INPUT_PATTERNS[@]}"; do
+    if ! grep -qi "$pattern" "$USING_SUPERPOWERS_FILE"; then
+        echo "    missing request_user_input preflight pattern: $pattern"
+        MISSING=1
+    fi
+done
+
+if [ "$MISSING" -eq 0 ]; then
+    pass "using-superpowers preflight documents request_user_input availability check"
+else
+    fail "using-superpowers preflight missing request_user_input availability guidance"
+fi
+
+echo ""
+
 echo "Test 1d: Finishing base-branch detection guidance..."
 FINISHING_BRANCH_FILE="$REPO_ROOT/skills/finishing-a-development-branch/SKILL.md"
 
