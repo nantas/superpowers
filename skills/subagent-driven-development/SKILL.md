@@ -45,19 +45,20 @@ Default to the lightest safe tier. Do not default small tasks to the full review
 
 1. Verify `using-superpowers preflight` already ran for this session.
 2. If preflight cache is absent, stop and invoke using-superpowers first.
-3. Read plan once and extract all tasks with full text/context.
-4. Initialize `track_tasks` for all tasks.
-5. Announce the selected tier, stage sequence, and expected time/reliability tradeoff to the user.
-6. For each task, dispatch workers with exact task text + a minimal task packet (goal, scope, prohibited scope, expected return format, completion criteria).
-7. For each task, run the selected gate sequence:
+3. If preflight reports `large-worktree-risk=true` and `worktree-dirty=true`, default to controller-first fallback-serial execution for implementation tasks; only dispatch narrow read-only workers unless user explicitly overrides.
+4. Read plan once and extract all tasks with full text/context.
+5. Initialize `track_tasks` for all tasks.
+6. Announce the selected tier, stage sequence, and expected time/reliability tradeoff to the user.
+7. For each task, dispatch workers with exact task text + a minimal task packet. Required packet fields: goal, scope, prohibited scope, expected return format, completion criteria, explicit write set, `forbidden_write_set`, `max_steps`, and `must_stop_after`.
+8. For each task, run the selected gate sequence:
    - dispatch implementer worker with exact task text + context; for Codex-oriented runs, prefer `fork_context=true`,
    - wait for implementer final status via `wait_worker`,
    - close implementer worker via `close_worker`,
    - if tier is `moderate`: dispatch one reviewer, wait, close, and loop until approved,
    - if tier is `high-risk`: dispatch spec reviewer, wait, close, loop until approved; then dispatch code-quality reviewer, wait, close, loop until approved,
    - mark task complete.
-8. After all tasks, run final overall code review.
-9. Hand off to `superpowers:finishing-a-development-branch`.
+9. After all tasks, run final overall code review.
+10. Hand off to `superpowers:finishing-a-development-branch`.
 
 ## Worker Prompt Assets
 
@@ -86,9 +87,10 @@ If either reviewer reports issues:
 
 If a worker times out or drifts materially from the task:
 
-1. close or recover the worker as supported by the runtime,
-2. fallback to controller execution or fallback-serial mode for that task,
-3. keep the same tier semantics even when execution falls back.
+1. first timeout: run a short `wait_worker` retry,
+2. second timeout: recover with `message_worker` interrupt/re-focus (or runtime-equivalent recovery),
+3. third timeout, or repeated drift: close/recover worker and force fallback to controller execution or fallback-serial mode for that task,
+4. keep the same tier semantics even when execution falls back.
 
 ## Completion Signal Rules
 

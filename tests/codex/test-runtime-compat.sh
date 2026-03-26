@@ -179,11 +179,13 @@ DISPATCH_SKILL_FILE="$REPO_ROOT/skills/dispatching-parallel-agents/SKILL.md"
 LARGE_GUARD_PATTERNS=(
     "repo/worktree scale risk"
     "large-worktree-risk"
+    "worktree-dirty"
     "large-worktree cache"
     "worktree-exempt"
     "Skip heavy baseline checks"
     "git ls-files | wc -l"
     "git count-objects -v"
+    "git status --porcelain"
 )
 
 MISSING=0
@@ -214,6 +216,10 @@ fi
 
 if ! grep -qi "heavy-checks-skipped" "$USING_SUPERPOWERS_FILE"; then
     fail "using-superpowers missing heavy-checks-skipped cache field"
+fi
+
+if ! grep -qi "worktree-dirty" "$USING_SUPERPOWERS_FILE"; then
+    fail "using-superpowers missing worktree-dirty cache field"
 fi
 
 if ! grep -qi "worktree-exempt" "$WRITING_PLANS_FILE" "$EXECUTING_PLANS_FILE" "$SDD_SKILL_FILE"; then
@@ -308,6 +314,12 @@ RELIABILITY_PATTERNS=(
     "wait-any"
     "fallback"
     "close_agent"
+    "max_steps"
+    "must_stop_after"
+    "forbidden_write_set"
+    "first timeout"
+    "second timeout"
+    "third timeout"
 )
 
 MISSING=0
@@ -419,6 +431,7 @@ echo "Test 1e: Subagent lifecycle template safeguards..."
 IMPLEMENTER_PROMPT_FILE="$REPO_ROOT/skills/subagent-driven-development/implementer-prompt.md"
 SPEC_REVIEWER_PROMPT_FILE="$REPO_ROOT/skills/subagent-driven-development/spec-reviewer-prompt.md"
 QUALITY_REVIEWER_PROMPT_FILE="$REPO_ROOT/skills/subagent-driven-development/code-quality-reviewer-prompt.md"
+REQUESTING_REVIEWER_PROMPT_FILE="$REPO_ROOT/skills/requesting-code-review/code-reviewer.md"
 
 MISSING=0
 if ! grep -q 'spawn_worker` -> `wait_worker` -> `close_worker' "$IMPLEMENTER_PROMPT_FILE"; then
@@ -440,11 +453,30 @@ SDD_PATTERNS=(
     "Completion gate source of truth"
     "Never use file changes, log output, or commit appearance"
     "pending_ids"
+    "max_steps"
+    "must_stop_after"
+    "forbidden_write_set"
+    "first timeout"
+    "second timeout"
+    "third timeout"
 )
 
 for pattern in "${SDD_PATTERNS[@]}"; do
     if ! grep -qi "$pattern" "$SDD_SKILL_FILE"; then
         echo "    subagent-driven-development missing pattern: $pattern"
+        MISSING=1
+    fi
+done
+
+REVIEWER_PATTERNS=(
+    "any write = review failure"
+    "checked_files"
+    "no-write attestation"
+)
+
+for pattern in "${REVIEWER_PATTERNS[@]}"; do
+    if ! grep -qi "$pattern" "$SPEC_REVIEWER_PROMPT_FILE" "$QUALITY_REVIEWER_PROMPT_FILE" "$REQUESTING_REVIEWER_PROMPT_FILE"; then
+        echo "    reviewer prompts missing pattern: $pattern"
         MISSING=1
     fi
 done

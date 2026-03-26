@@ -36,11 +36,13 @@ If unavailable, remind the user to enable it in settings before long clarificati
 Use fast probes first (index/metadata only). Avoid recursive scans unless requested.
 Unity markers: `ProjectSettings/ProjectVersion.txt`, `Assets/`, `Packages/manifest.json`.
 Probe with `git ls-files | wc -l`, `git count-objects -v | awk '/size-pack/ {print $2}'`, and `Library/`.
+Probe dirty-worktree state with `git status --porcelain`.
 
 Classify `large-worktree-risk` when Unity markers are present plus tracked files `>= 200000`, pack size `>= 2000000`, or `Library/` exists; or any repo has tracked files `>= 500000`.
+If `large-worktree-risk=true` and worktree is dirty, default execution mode to controller-first `fallback-serial` for implementation tasks; only allow narrow read-only workers unless the user explicitly overrides.
 If `large-worktree-risk` is true, ask "Large Unity/monorepo detected. Skip heavy baseline checks for this run?" If skipped, record exclusion, proceed with minimal verification, and set `worktree-exempt=true` to bypass `using-git-worktrees` for this session.
 
-Preflight cache: Cache: large-worktree-risk=<true/false>, worktree-exempt=<true/false>, heavy-checks-skipped=<true/false>
+Preflight cache: Cache: large-worktree-risk=<true/false>, worktree-dirty=<true/false>, worktree-exempt=<true/false>, heavy-checks-skipped=<true/false>
 
 ### Preflight Output Contract (Normative)
 
@@ -54,6 +56,7 @@ Required preflight cache fields:
 - `permission_mode`: `normal | git-write-restricted`
 - `request_user_input_available`: `true | false`
 - `large-worktree-risk`: `true | false`
+- `worktree-dirty`: `true | false`
 - `worktree-exempt`: `true | false`
 - `heavy-checks-skipped`: `true | false`
 

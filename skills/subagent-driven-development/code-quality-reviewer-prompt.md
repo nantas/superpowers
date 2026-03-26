@@ -20,3 +20,7 @@ Runtime adapter (`spawn_worker` -> `wait_worker` -> `close_worker`):
 ```
 
 **Code reviewer returns:** Strengths, Issues (Critical/Important/Minor), Assessment
+
+**Reviewer hard constraints:**
+- Any write/edit command is review failure.
+- Output must include `checked_files` and a no-write attestation sentence.

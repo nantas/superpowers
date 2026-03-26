@@ -50,6 +50,22 @@ Use these action names in skill instructions and prompt templates:
 - `wait_worker`: block until worker returns or timeout; when wait is wait-any over multiple ids, loop until `pending_ids` is empty
 - `close_worker`: close worker when done
 
+## Minimal Task Packet Contract (Normative)
+
+Every worker dispatch MUST include a minimal task packet with:
+
+1. objective,
+2. scope boundary,
+3. prohibited scope,
+4. expected return format,
+5. completion criteria,
+6. explicit write set,
+7. `forbidden_write_set`,
+8. `max_steps`,
+9. `must_stop_after`.
+
+Controllers MUST treat missing packet fields as a dispatch-preparation defect and fix the prompt before spawning.
+
 ## Worker Completion Contract (Normative)
 
 1. Completion source of truth MUST be `wait_worker` final status (`status`/`timed_out` or runtime equivalent).
@@ -124,8 +140,11 @@ For Codex multi-agent mode, map abstract actions to:
 ### Codex Context and Reliability Guardrails (Normative)
 
 1. For Codex-oriented worker dispatch, controllers SHOULD default to `fork_context=true` unless the worker prompt is already fully self-contained and isolating parent context is intentional.
-2. Even when `fork_context=true` is used, controllers MUST include a minimal task packet covering objective, scope boundary, prohibited scope, expected return format, and completion criteria.
-3. Controllers MUST define a worker time budget or phase timeout and switch to documented fallback behavior if the worker times out, drifts, or cannot complete reliably.
+2. Even when `fork_context=true` is used, controllers MUST include a minimal task packet that satisfies the Minimal Task Packet Contract.
+3. Controllers MUST define a worker time budget or phase timeout and use this escalation:
+   - first timeout: short `wait_worker` retry,
+   - second timeout: `message_worker` with interrupt/re-focus (or runtime-equivalent recovery),
+   - third timeout (or repeated drift): force fallback to controller execution / fallback-serial mode for that task.
 4. In Codex, `close_agent` is cleanup only; controllers MUST NOT treat `close_agent` return payloads as proof of completion.
 
 ### Codex Wait Semantics (Normative)

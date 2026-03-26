@@ -17,6 +17,13 @@ Runtime adapter (`spawn_worker` -> `wait_worker` -> `close_worker`):
 
     [Scene-setting: where this fits, dependencies, architectural context]
 
+    ## Scope Guardrails
+
+    - Allowed write set: [explicit file/module list]
+    - forbidden_write_set: [paths/files that must not be modified]
+    - max_steps: [hard step budget, e.g. 20]
+    - must_stop_after: [explicit stop condition or timestamp]
+
     ## Before You Begin
 
     If you have questions about:
@@ -38,6 +45,11 @@ Runtime adapter (`spawn_worker` -> `wait_worker` -> `close_worker`):
     6. Report back
 
     Work from: [directory]
+
+    **Hard stop rules:**
+    - Do not write outside the allowed write set.
+    - If you hit `max_steps` or `must_stop_after`, stop and report status immediately.
+    - If scope is insufficient, stop and request controller clarification before editing more files.
 
     **While you work:** If you encounter something unexpected or unclear, **ask questions**.
     It's always OK to pause and clarify. Don't guess or make assumptions.

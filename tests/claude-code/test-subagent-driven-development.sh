@@ -149,8 +149,40 @@ fi
 
 echo ""
 
-# Test 9: Verify main branch warning
-echo "Test 9: Main branch red flag..."
+# Test 9: Verify reviewer no-write constraint
+echo "Test 9: Reviewer no-write contract..."
+
+output=$(run_claude "In subagent-driven-development, can a reviewer edit code while reviewing? What output fields prove it stayed read-only?" 30)
+
+if assert_contains "$output" "no.*write\|read-only\|read only\|review failure" "Reviewer write prohibition mentioned"; then
+    : # pass
+else
+    exit 1
+fi
+
+if assert_contains "$output" "checked_files\|no-write attestation\|attestation" "Reviewer evidence fields mentioned"; then
+    : # pass
+else
+    exit 1
+fi
+
+echo ""
+
+# Test 10: Verify timeout escalation policy
+echo "Test 10: Timeout escalation..."
+
+output=$(run_claude "In subagent-driven-development, what should the controller do on first, second, and third worker timeout?" 30)
+
+if assert_contains "$output" "first.*short.*wait\|second.*interrupt\|third.*fallback\|timeout.*escalation" "Timeout escalation policy mentioned"; then
+    : # pass
+else
+    exit 1
+fi
+
+echo ""
+
+# Test 11: Verify main branch warning
+echo "Test 11: Main branch red flag..."
 
 output=$(run_claude "In subagent-driven-development, is it okay to start implementation directly on the main branch?" 30)
 

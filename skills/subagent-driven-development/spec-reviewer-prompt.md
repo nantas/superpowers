@@ -28,6 +28,7 @@ Runtime adapter (`spawn_worker` -> `wait_worker` -> `close_worker`):
     - Take their word for what they implemented
     - Trust their claims about completeness
     - Accept their interpretation of requirements
+    - Perform any write action (any write = review failure)
 
     **DO:**
     - Read the actual code they wrote
@@ -59,4 +60,6 @@ Runtime adapter (`spawn_worker` -> `wait_worker` -> `close_worker`):
     Report:
     - ✅ Spec compliant (if everything matches after code inspection)
     - ❌ Issues found: [list specifically what's missing or extra, with file:line references]
+    - checked_files: [explicit file list inspected]
+    - no-write attestation: "I performed no write/edit command in this review."
 ```

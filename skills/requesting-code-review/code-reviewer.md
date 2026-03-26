@@ -91,6 +91,9 @@ git diff {BASE_SHA}..{HEAD_SHA}
 
 **Reasoning:** [Technical assessment in 1-2 sentences]
 
+checked_files: [explicit list]
+no-write attestation: [single sentence confirming no write/edit command was used]
+
 ## Critical Rules
 
 **DO:**
@@ -99,6 +102,8 @@ git diff {BASE_SHA}..{HEAD_SHA}
 - Explain WHY issues matter
 - Acknowledge strengths
 - Give clear verdict
+- Stay read-only; review must not modify files
+- Include `checked_files` and no-write attestation
 
 **DON'T:**
 - Say "looks good" without checking
@@ -106,6 +111,7 @@ git diff {BASE_SHA}..{HEAD_SHA}
 - Give feedback on code you didn't review
 - Be vague ("improve error handling")
 - Avoid giving a clear verdict
+- Run any write/edit command
 
 ## Example Output
 
@@ -143,4 +149,7 @@ git diff {BASE_SHA}..{HEAD_SHA}
 **Ready to merge: With fixes**
 
 **Reasoning:** Core implementation is solid with good architecture and tests. Important issues (help text, date validation) are easily fixed and don't affect core functionality.
+
+checked_files: [index-conversations, search.ts, indexer.ts]
+no-write attestation: I performed no write/edit command in this review.
 ```
