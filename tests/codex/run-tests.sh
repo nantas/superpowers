@@ -20,6 +20,10 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
+if [ "$RUN_INTEGRATION" = true ]; then
+    RUNTIME_COMPAT_ARGS+=(--integration)
+fi
+
 if [ "${#RUNTIME_COMPAT_ARGS[@]}" -gt 0 ]; then
     bash "$SCRIPT_DIR/test-runtime-compat.sh" "${RUNTIME_COMPAT_ARGS[@]}"
 else

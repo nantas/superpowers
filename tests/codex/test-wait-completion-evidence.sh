@@ -15,7 +15,25 @@ run_with_timeout() {
     elif command -v gtimeout >/dev/null 2>&1; then
         gtimeout "$seconds" "$@"
     else
-        "$@"
+        "$@" &
+        local cmd_pid=$!
+        (
+            sleep "$seconds"
+            kill -TERM "$cmd_pid" 2>/dev/null || exit 0
+            sleep 2
+            kill -KILL "$cmd_pid" 2>/dev/null || true
+        ) &
+        local watcher_pid=$!
+        local status=0
+        wait "$cmd_pid" || status=$?
+        kill "$watcher_pid" 2>/dev/null || true
+        wait "$watcher_pid" 2>/dev/null || true
+
+        if [ "$status" -eq 143 ] || [ "$status" -eq 137 ]; then
+            return 124
+        fi
+
+        return "$status"
     fi
 }
 

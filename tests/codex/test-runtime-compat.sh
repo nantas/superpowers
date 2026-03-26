@@ -12,6 +12,24 @@ PASS_COUNT=0
 FAIL_COUNT=0
 SKIP_COUNT=0
 INTEGRATION_SKIPPED=false
+RUN_INTEGRATION=false
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --integration|-i)
+            RUN_INTEGRATION=true
+            shift
+            ;;
+        *)
+            echo "Ignoring unknown argument: $1" >&2
+            shift
+            ;;
+    esac
+done
+
+if [ "${CODEX_RUNTIME_COMPAT_INTEGRATION:-0}" = "1" ]; then
+    RUN_INTEGRATION=true
+fi
 
 pass() {
     echo "  [PASS] $1"
@@ -37,7 +55,25 @@ run_with_timeout() {
     elif command -v gtimeout >/dev/null 2>&1; then
         gtimeout "$seconds" "$@"
     else
-        "$@"
+        "$@" &
+        local cmd_pid=$!
+        (
+            sleep "$seconds"
+            kill -TERM "$cmd_pid" 2>/dev/null || exit 0
+            sleep 2
+            kill -KILL "$cmd_pid" 2>/dev/null || true
+        ) &
+        local watcher_pid=$!
+        local status=0
+        wait "$cmd_pid" || status=$?
+        kill "$watcher_pid" 2>/dev/null || true
+        wait "$watcher_pid" 2>/dev/null || true
+
+        if [ "$status" -eq 143 ] || [ "$status" -eq 137 ]; then
+            return 124
+        fi
+
+        return "$status"
     fi
 }
 
@@ -291,6 +327,94 @@ fi
 
 echo ""
 
+echo "Test 1g: Plan execution checkpoint policy..."
+PLAN_POLICY_PATTERNS=(
+    "User Verification: required|not-required"
+    "missing, treat it as not-required"
+    "default cadence is every 3 tasks"
+    "do not wait for feedback"
+    "status ledger"
+    "Task | Status | Facts"
+    "blocked"
+    "unexpected result"
+    "human verification gate"
+    "Hand off directly to superpowers:finishing-a-development-branch"
+    "Do not ask whether to enter finishing flow"
+)
+
+MISSING=0
+for pattern in "${PLAN_POLICY_PATTERNS[@]}"; do
+    if ! grep -qi "$pattern" "$WRITING_PLANS_FILE" "$EXECUTING_PLANS_FILE"; then
+        echo "    missing plan policy pattern: $pattern"
+        MISSING=1
+    fi
+done
+
+if [ "$MISSING" -eq 0 ]; then
+    pass "writing/executing plans define dynamic batches, status-ledger updates, and non-duplicative finishing handoff"
+else
+    fail "plan execution policy missing required checkpoint/status semantics"
+fi
+
+echo ""
+
+echo "Test 1h: Writing-skills boundary and clarification contract..."
+WRITING_SKILLS_FILE="$REPO_ROOT/skills/writing-skills/SKILL.md"
+WRITING_SKILLS_SUBAGENT_FILE="$REPO_ROOT/skills/writing-skills/testing-skills-with-subagents.md"
+
+BOUNDARY_PATTERNS=(
+    "only skill that performs runtime/capability detection"
+    "downstream skills consume preflight cache"
+    "must not repeat runtime probing"
+    "request_user_input_available"
+)
+
+WRITING_SKILLS_PATTERNS=(
+    "requires completed .*using-superpowers preflight"
+    "If preflight cache is absent"
+    "invoke .*using-superpowers"
+    "Do not run runtime/capability probing"
+    "request_user_input_available"
+    "one decision boundary per interaction"
+)
+
+SUBAGENT_PATTERNS=(
+    "Do not perform runtime probing inside scenario tests"
+    "worker lifecycle is available from preflight"
+    "wait-based completion"
+    "cleanup semantics"
+)
+
+MISSING=0
+for pattern in "${BOUNDARY_PATTERNS[@]}"; do
+    if ! grep -qi "$pattern" "$USING_SUPERPOWERS_FILE"; then
+        echo "    missing using-superpowers boundary pattern: $pattern"
+        MISSING=1
+    fi
+done
+
+for pattern in "${WRITING_SKILLS_PATTERNS[@]}"; do
+    if ! grep -qi "$pattern" "$WRITING_SKILLS_FILE"; then
+        echo "    missing writing-skills pattern: $pattern"
+        MISSING=1
+    fi
+done
+
+for pattern in "${SUBAGENT_PATTERNS[@]}"; do
+    if ! grep -qi "$pattern" "$WRITING_SKILLS_SUBAGENT_FILE"; then
+        echo "    missing writing-skills subagent pattern: $pattern"
+        MISSING=1
+    fi
+done
+
+if [ "$MISSING" -eq 0 ]; then
+    pass "Writing-skills docs enforce preflight boundary and incremental clarification contract"
+else
+    fail "Writing-skills boundary/clarification contract missing required patterns"
+fi
+
+echo ""
+
 echo "Test 1e: Subagent lifecycle template safeguards..."
 IMPLEMENTER_PROMPT_FILE="$REPO_ROOT/skills/subagent-driven-development/implementer-prompt.md"
 SPEC_REVIEWER_PROMPT_FILE="$REPO_ROOT/skills/subagent-driven-development/spec-reviewer-prompt.md"
@@ -333,8 +457,11 @@ fi
 
 echo ""
 
-# Integration tests require codex CLI.
-if ! command -v codex >/dev/null 2>&1; then
+# Integration tests are opt-in because they invoke `codex exec`.
+if [ "$RUN_INTEGRATION" = false ]; then
+    skip "integration checks disabled by default; pass --integration to enable codex exec checks"
+    INTEGRATION_SKIPPED=true
+elif ! command -v codex >/dev/null 2>&1; then
     skip "codex CLI not found; skipping runtime integration checks"
     INTEGRATION_SKIPPED=true
 fi
