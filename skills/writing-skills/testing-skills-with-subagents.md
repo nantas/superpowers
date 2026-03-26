@@ -164,6 +164,13 @@ Make agent believe it's real work, not a quiz.
 
 Agent violated rule despite having the skill? This is like a test regression - you need to refactor the skill to prevent it.
 
+## Codex Execution Recipe (Boundary-Aligned)
+
+1. Do not perform runtime probing inside scenario tests; consume preflight cache from `using-superpowers`.
+2. When worker lifecycle is available from preflight, use mapped worker lifecycle semantics from `skills/_shared/runtime-compat.md`.
+3. Completion truth comes from wait-based completion semantics; do not infer completion from file changes, logs, or artifacts.
+4. Preserve cleanup semantics after final wait results when runtime exposes explicit close behavior.
+
 **Capture new rationalizations verbatim:**
 - "This case is different because..."
 - "I'm following the spirit not the letter"

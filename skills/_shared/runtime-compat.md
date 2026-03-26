@@ -14,6 +14,12 @@ At session start, identify whether runtime supports:
 - `wait_worker` (wait for worker completion)
 - `close_worker` (release worker)
 
+## Clarification Capability Contract (Normative)
+
+1. `request_user_input` is a first-class clarification capability signal for Codex-oriented workflows.
+2. Clarification capability is detected once during `using-superpowers` preflight and cached for downstream reuse.
+3. Downstream skills must consume cached `request_user_input_available` and must not re-probe runtime capability.
+
 ## Abstract-Action Resolution Contract (Normative)
 
 1. `track_tasks`, `load_skill`, `spawn_worker`, `message_worker`, `wait_worker`, and `close_worker` are abstract actions, not literal tool names.

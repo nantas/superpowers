@@ -7,9 +7,9 @@ description: Use when you have a written implementation plan to execute in a sep
 
 ## Overview
 
-Load plan, review critically, execute tasks in batches, report for review between batches.
+Load plan, review critically, execute tasks in runtime batches, and keep plan state current in the status ledger.
 
-**Core principle:** Batch execution with checkpoints for architect review.
+**Core principle:** Keep execution moving unless there is a real decision gate.
 
 **Runtime adapter:** Use abstract actions from `../_shared/runtime-compat.md` (`track_tasks`, and worker actions when needed).
 
@@ -28,33 +28,53 @@ If preflight cache is absent, stop and invoke using-superpowers first.
 6. If concerns: Raise them with your human partner before starting
 7. If no concerns: initialize `track_tasks` and proceed
 
-### Step 2: Execute Batch
-**Default: First 3 tasks**
+### Step 2: Build Runtime Batches
 
-For each task:
+1. Read each task's `User Verification` field (`required` or `not-required`).
+2. If `User Verification` is missing, treat it as not-required.
+3. For non-verification work, default cadence is every 3 tasks.
+4. For verification work, combine adjacent `User Verification: required` tasks into one human verification gate.
+5. Use batch boundaries for progress persistence, not automatic waiting.
+
+### Step 3: Execute and Persist State
+
+For each task in the active batch:
 1. Mark as in_progress
 2. Follow each step exactly (plan has bite-sized steps)
 3. Run verifications as specified
-4. Mark as completed
+4. Update top-of-plan status ledger entry (`Task | Status | Facts`)
+5. Mark task as completed or blocked
 
-### Step 3: Report
-When batch complete:
+Status ledger rules:
+- Keep one row per task in the top section.
+- Facts must capture both passing checks and blocker details.
+- Allowed status values: `in_progress`, `completed`, `blocked`.
+
+### Step 4: Decide Whether to Pause or Continue
+
+When a batch completes, do not wait for feedback by default.
+Continue automatically unless one of these stop conditions is true:
+- blocked
+- unexpected result
+- human verification gate reached (all required tasks in the gate are implemented and self-verified)
+
+When stopping:
 - Show what was implemented
 - Show verification output
-- Say: "Ready for feedback."
+- State the exact reason for stopping and ask only for the required user decision.
 
-### Step 4: Continue
-Based on feedback:
-- Apply changes if needed
-- Execute next batch
-- Repeat until complete
+When not stopping:
+- Report concise progress
+- Select next runtime batch
+- Repeat
 
 ### Step 5: Complete Development
 
 After all tasks complete and verified:
 - Announce: "I'm using the finishing-a-development-branch skill to complete this work."
 - **REQUIRED SUB-SKILL:** Use superpowers:finishing-a-development-branch
-- Follow that skill to verify tests, present options, execute choice
+- Hand off directly to superpowers:finishing-a-development-branch
+- Do not ask whether to enter finishing flow
 
 ## When to Stop and Ask for Help
 
@@ -63,6 +83,8 @@ After all tasks complete and verified:
 - Plan has critical gaps preventing starting
 - You don't understand an instruction
 - Verification fails repeatedly
+- A human verification gate is reached and user validation is required
+- An unexpected result invalidates assumptions in the plan
 
 **Ask for clarification rather than guessing.**
 
@@ -79,7 +101,8 @@ After all tasks complete and verified:
 - Follow plan steps exactly
 - Don't skip verifications
 - Reference skills when plan says to
-- Between batches: just report and wait
+- Update the plan status ledger after each batch
+- Keep executing unless a real decision gate is hit
 - Stop when blocked, don't guess
 - Never start implementation on main/master branch without explicit user consent
 

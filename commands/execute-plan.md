@@ -1,5 +1,5 @@
 ---
-description: Execute plan in batches with review checkpoints
+description: Execute plan with runtime checkpoints, status-ledger updates, and decision-gate pauses
 disable-model-invocation: true
 ---
 

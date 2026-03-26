@@ -95,6 +95,21 @@ Graphviz conventions: `graphviz-conventions.dot`.
 
 Full test method: `testing-skills-with-subagents.md`.
 
+## Runtime Integration (Consumer Mode)
+
+This skill requires completed `using-superpowers preflight`.
+If preflight cache is absent, stop and invoke `using-superpowers` first.
+Do not run runtime/capability probing in this skill.
+
+Consume preflight cache as input, including `request_user_input_available`.
+For Codex clarification loops:
+1. Ask one decision boundary per interaction.
+2. Prefer 2-3 structured options.
+3. Avoid one-shot, large free-form templates.
+4. Apply incremental updates after each confirmed answer.
+
+Use `@superpowers:using-superpowers` for detection ownership and `skills/_shared/runtime-compat.md` for abstract action mappings.
+
 ## Minimal Creation Checklist
 
 Use `track_tasks` for each item.

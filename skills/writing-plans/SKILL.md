@@ -44,12 +44,26 @@ If preflight cache is absent, stop and invoke using-superpowers first.
 **Tech Stack:** [Key technologies/libraries]
 
 ---
+
+## Status Ledger
+
+Track execution state here. `executing-plans` updates this section in place.
+
+Task | Status | Facts
+--- | --- | ---
+<!-- executing-plans appends one row per task as execution advances -->
 ```
+
+Keep the status ledger at the top of the plan so execution can resume safely after context switches.
 
 ## Task Structure
 
 ````markdown
 ### Task N: [Component Name]
+
+**User Verification: required|not-required**
+Default is `not-required` if omitted.
+Place tasks that can be verified together in adjacent Task blocks.
 
 **Files:**
 - Create: `exact/path/to/file.py`
@@ -93,6 +107,8 @@ git commit -m "feat: add specific feature"
 - Exact file paths always
 - Complete code in plan (not "add validation")
 - Exact commands with expected output
+- Include `User Verification` on tasks that need human verification before continuing
+- Keep human-verification tasks adjacent when they should be validated together
 - Reference relevant skills with @ syntax
 - DRY, YAGNI, TDD, frequent commits
 
