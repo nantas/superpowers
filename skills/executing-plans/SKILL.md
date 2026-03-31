@@ -23,10 +23,15 @@ If preflight cache is absent, stop and invoke using-superpowers first.
 1. Verify `using-superpowers preflight` already ran for this session.
 2. If preflight cache is absent, stop and invoke using-superpowers first.
 3. Read plan file
-4. Review critically - identify any questions or concerns about the plan
-5. Honor preflight workspace constraints before starting; if cache reports `worktree-exempt=true`, do not invoke `using-git-worktrees`
-6. If concerns: Raise them with your human partner before starting
-7. If no concerns: initialize `track_tasks` and proceed
+4. Validate required planning gates before execution:
+   - `Design Traceability Matrix` exists.
+   - `Plan Audit Verdict` exists at the end of the plan.
+   - `approval_decision` exists and equals `pass`.
+5. If any required gate is missing or `approval_decision != pass`: mark plan `blocked`, report the exact missing gate, and stop for plan correction.
+6. Review critically - identify any additional questions or concerns about the plan.
+7. Honor preflight workspace constraints before starting; if cache reports `worktree-exempt=true`, do not invoke `using-git-worktrees`.
+8. If concerns: Raise them with your human partner before starting.
+9. If no concerns: initialize `track_tasks` and proceed.
 
 ### Step 2: Build Runtime Batches
 
@@ -61,10 +66,12 @@ Continue automatically unless one of these stop conditions is true:
 When stopping:
 - Show what was implemented
 - Show verification output
+- Include fixed status fields: `design_coverage_status`, `authenticity_status`, `semantic_closure_status`
 - State the exact reason for stopping and ask only for the required user decision.
 
 When not stopping:
 - Report concise progress
+- Include fixed status fields: `design_coverage_status`, `authenticity_status`, `semantic_closure_status`
 - Select next runtime batch
 - Repeat
 
@@ -81,6 +88,9 @@ After all tasks complete and verified:
 **STOP executing immediately when:**
 - Hit a blocker mid-batch (missing dependency, test fails, instruction unclear)
 - Plan has critical gaps preventing starting
+- `Design Traceability Matrix` is missing
+- `Plan Audit Verdict` is missing
+- `approval_decision` is not `pass`
 - You don't understand an instruction
 - Verification fails repeatedly
 - A human verification gate is reached and user validation is required

@@ -56,6 +56,35 @@ Task | Status | Facts
 
 Keep the status ledger at the top of the plan so execution can resume safely after context switches.
 
+## Design Traceability Matrix (Required)
+
+Every plan MUST include a `Design Traceability Matrix` section near the top of the document (after `Status Ledger`).
+
+Use this table shape:
+
+```markdown
+## Design Traceability Matrix
+
+Design Clause ID | Criticality | Mapped Tasks | Verification Command | Artifact Evidence Field | Failure Signal
+--- | --- | --- | --- | --- | ---
+DC-01 | critical | Task 2, Task 3 | `pytest tests/foo/test_bar.py -k chain` | `reports/case_a.json:confirmed_chain.steps` | `confirmed_chain.steps is empty`
+```
+
+Rules:
+- Every `critical` design clause must map to at least one task.
+- Every mapped clause must include executable verification and concrete evidence fields.
+- Every mapped clause must include an explicit failure signal.
+- Do not accept structure-only checks for critical clauses; add semantic checks.
+
+## Authenticity Assertions (Required)
+
+For each critical module, include at least one negative test/assertion that catches fake compliance.
+
+Minimum assertion patterns:
+- `assert no placeholder path`
+- `assert live mode has tool evidence`
+- `assert freeze requires non-empty confirmed_chain.steps`
+
 ## Task Structure
 
 ````markdown
@@ -112,9 +141,54 @@ git commit -m "feat: add specific feature"
 - Reference relevant skills with @ syntax
 - DRY, YAGNI, TDD, frequent commits
 
+## Plan Authenticity Audit (Required, Post-Write)
+
+After the plan file is written, and before any execution handoff, run an independent review subagent audit.
+
+Use runtime adapter actions from `../_shared/runtime-compat.md`:
+1. `spawn_worker` a read-only reviewer for the plan (no file edits allowed for the worker).
+2. Reviewer checks whether the plan can truly satisfy design/requirement semantics, not just structure.
+3. `wait_worker` for reviewer completion (completion source of truth).
+4. `close_worker` when finished.
+
+Audit rubric (required):
+- Design Coverage: critical clauses have task + command + evidence + failure signal mapping.
+- Authenticity: no fake live-mode semantics without tool evidence.
+- Placeholder Leakage: key artifacts reject placeholder values.
+- Semantic Closure: checks verify real closure, not only field presence.
+- Negative Tests: critical paths include anti-fake negative cases.
+
+Severity model:
+- `P0`: critical mismatch; execution handoff is blocked.
+- `P1`: major risk; must be fixed or explicitly accepted as risk in the verdict.
+- `P2`: improvement suggestion; does not block by itself.
+
+Pass condition for handoff:
+- zero `P0`;
+- every `P1` is marked `fixed` or `accepted`.
+
+Append this block to the end of the same plan file:
+
+```markdown
+## Plan Audit Verdict
+audit_scope: [design doc sections / requirements covered]
+finding_summary: P0=<n>, P1=<n>, P2=<n>
+critical_mismatches:
+- [P0 item or `none`]
+major_risks:
+- [P1 item + status: fixed|accepted]
+anti_placeholder_checks:
+- [check + result]
+authenticity_checks:
+- [check + result]
+approval_decision: pass|blocked
+```
+
+If `approval_decision` is `blocked`, revise plan and rerun audit until it is `pass`.
+
 ## Execution Handoff
 
-After saving the plan, offer execution choice:
+After saving the plan and recording a passing `Plan Audit Verdict`, offer execution choice:
 
 **"Plan complete and saved to `docs/plans/<filename>.md`. Two execution options:**
 

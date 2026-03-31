@@ -31,6 +31,7 @@ else
 fi
 bash "$SCRIPT_DIR/test-brainstorming-contract.sh"
 bash "$SCRIPT_DIR/test-brainstorming-complex-contract.sh"
+bash "$SCRIPT_DIR/test-plan-semantic-gates.sh"
 bash "$SCRIPT_DIR/test-skill-context-budget.sh"
 
 if [ "$RUN_INTEGRATION" = true ]; then
