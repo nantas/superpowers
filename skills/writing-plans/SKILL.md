@@ -93,6 +93,11 @@ Minimum assertion patterns:
 **User Verification: required|not-required**
 Default is `not-required` if omitted.
 Place tasks that can be verified together in adjacent Task blocks.
+If `required`, you MUST include all four fields below in the task block:
+- `Human Verification Checklist`: 3-7 concrete items the user can verify.
+- `Acceptance Criteria`: one explicit pass criterion per checklist item.
+- `Failure Signals`: what specific result means this item fails.
+- `User Decision Prompt`: exact prompt text asking only `通过` or `不通过`.
 
 **Files:**
 - Create: `exact/path/to/file.py`
@@ -138,6 +143,7 @@ git commit -m "feat: add specific feature"
 - Exact commands with expected output
 - Include `User Verification` on tasks that need human verification before continuing
 - Keep human-verification tasks adjacent when they should be validated together
+- For every `User Verification: required` task, include checklist + criteria + failure signals + fixed decision prompt
 - Reference relevant skills with @ syntax
 - DRY, YAGNI, TDD, frequent commits
 

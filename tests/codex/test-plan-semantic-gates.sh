@@ -83,6 +83,27 @@ require_patterns "$EXECUTING_PLANS_FILE" \
     "semantic_closure_status"
 
 echo ""
+echo "Test 4: human verification gate requires explicit acceptance contract..."
+require_patterns "$WRITING_PLANS_FILE" \
+    "writing-plans requires explicit user verification checklist and verdict prompt" \
+    "Human Verification Checklist" \
+    "Acceptance Criteria" \
+    "Failure Signals" \
+    "通过" \
+    "不通过"
+
+require_patterns "$EXECUTING_PLANS_FILE" \
+    "executing-plans requires fixed human-gate stop structure and binary decision" \
+    "Gate Scope" \
+    "What to Verify" \
+    "Pass Criteria" \
+    "Evidence" \
+    "Decision" \
+    "Do not ask whether to enter finishing flow" \
+    "通过" \
+    "不通过"
+
+echo ""
 echo "========================================"
 echo " Test Results Summary"
 echo "========================================"

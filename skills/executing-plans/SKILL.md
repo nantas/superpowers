@@ -69,6 +69,19 @@ When stopping:
 - Include fixed status fields: `design_coverage_status`, `authenticity_status`, `semantic_closure_status`
 - State the exact reason for stopping and ask only for the required user decision.
 
+If stopping because a human verification gate is reached, the stop message MUST include this exact structure:
+- `Gate Scope`: exact Task IDs covered by this gate.
+- `What to Verify`: 3-7 concrete user-check items.
+- `Pass Criteria`: one pass criterion for each check item.
+- `Evidence`: command output snippets and/or artifact paths for each check item.
+- `Decision`: ask only `通过` or `不通过`.
+
+Human verification gate constraints:
+- Do not ask whether to enter finishing flow.
+- Do not ask open-ended "what do you think" questions.
+- If the user responds `不通过`, mark gate task(s) as `blocked` with failed criterion details.
+- If the user responds `通过`, continue execution; after all tasks complete, hand off directly to finishing flow.
+
 When not stopping:
 - Report concise progress
 - Include fixed status fields: `design_coverage_status`, `authenticity_status`, `semantic_closure_status`

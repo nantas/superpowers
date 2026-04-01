@@ -360,6 +360,13 @@ PLAN_POLICY_PATTERNS=(
     "blocked"
     "unexpected result"
     "human verification gate"
+    "Gate Scope"
+    "What to Verify"
+    "Pass Criteria"
+    "Evidence"
+    "Decision"
+    "通过"
+    "不通过"
     "Hand off directly to superpowers:finishing-a-development-branch"
     "Do not ask whether to enter finishing flow"
 )
