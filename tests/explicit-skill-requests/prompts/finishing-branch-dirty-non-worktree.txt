@@ -1,0 +1,8 @@
+finishing-a-development-branch, please.
+
+Context:
+- This is a non-worktree branch workflow.
+- There are uncommitted file changes right now.
+- The current feature branch was mistakenly set as the merge target branch too.
+
+Give the first concrete checks/commands to run for this exact situation.

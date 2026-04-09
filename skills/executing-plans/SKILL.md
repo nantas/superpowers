@@ -22,16 +22,20 @@ If preflight cache is absent, stop and invoke using-superpowers first.
 ### Step 1: Load and Review Plan
 1. Verify `using-superpowers preflight` already ran for this session.
 2. If preflight cache is absent, stop and invoke using-superpowers first.
-3. Read plan file
-4. Validate required planning gates before execution:
+3. Read preflight workspace cache fields: `worktree-exempt`, `large-worktree-risk`, `worktree-dirty`.
+4. Select execution workspace before touching implementation tasks:
+   - If cache reports `worktree-exempt=true`, stay on current checkout (or another user-approved non-worktree feature branch workflow).
+   - If cache reports `worktree-exempt=false`, **REQUIRED SUB-SKILL:** use `superpowers:using-git-worktrees` before executing plan tasks.
+   - Never start implementation on `main/master` without explicit user consent.
+5. Read plan file.
+6. Validate required planning gates before execution:
    - `Design Traceability Matrix` exists.
    - `Plan Audit Verdict` exists at the end of the plan.
    - `approval_decision` exists and equals `pass`.
-5. If any required gate is missing or `approval_decision != pass`: mark plan `blocked`, report the exact missing gate, and stop for plan correction.
-6. Review critically - identify any additional questions or concerns about the plan.
-7. Honor preflight workspace constraints before starting; if cache reports `worktree-exempt=true`, do not invoke `using-git-worktrees`.
-8. If concerns: Raise them with your human partner before starting.
-9. If no concerns: initialize `track_tasks` and proceed.
+7. If any required gate is missing or `approval_decision != pass`: mark plan `blocked`, report the exact missing gate, and stop for plan correction.
+8. Review critically - identify any additional questions or concerns about the plan.
+9. If concerns: Raise them with your human partner before starting.
+10. If no concerns: initialize `track_tasks` and proceed.
 
 ### Step 2: Build Runtime Batches
 

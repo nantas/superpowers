@@ -226,6 +226,27 @@ if ! grep -qi "worktree-exempt" "$WRITING_PLANS_FILE" "$EXECUTING_PLANS_FILE" "$
     fail "plan workflow skills missing worktree exemption guidance"
 fi
 
+EXECUTING_WORKSPACE_PATTERNS=(
+    "worktree-exempt=false"
+    "REQUIRED SUB-SKILL"
+    "superpowers:using-git-worktrees"
+    "Never start implementation on"
+)
+
+MISSING=0
+for pattern in "${EXECUTING_WORKSPACE_PATTERNS[@]}"; do
+    if ! grep -qi "$pattern" "$EXECUTING_PLANS_FILE"; then
+        echo "    missing executing-plans workspace pattern: $pattern"
+        MISSING=1
+    fi
+done
+
+if [ "$MISSING" -eq 0 ]; then
+    pass "executing-plans enforces worktree setup when exemption is false"
+else
+    fail "executing-plans missing explicit worktree setup enforcement"
+fi
+
 PREFLIGHT_GATE_FILES=(
     "$USING_GIT_WORKTREES_FILE"
     "$WRITING_PLANS_FILE"
@@ -303,6 +324,27 @@ if [ "$MISSING" -eq 0 ]; then
     pass "finishing-a-development-branch documents base-branch detection from worktree origin"
 else
     fail "finishing-a-development-branch missing base-branch detection guidance"
+fi
+
+FINISHING_HYGIENE_PATTERNS=(
+    "git status --porcelain"
+    "Do not proceed with uncommitted changes"
+    "<base-branch> == <feature-branch>"
+    "Only cleanup for Options 1 and 4"
+)
+
+MISSING=0
+for pattern in "${FINISHING_HYGIENE_PATTERNS[@]}"; do
+    if ! grep -qi "$pattern" "$FINISHING_BRANCH_FILE"; then
+        echo "    missing finishing hygiene pattern: $pattern"
+        MISSING=1
+    fi
+done
+
+if [ "$MISSING" -eq 0 ]; then
+    pass "finishing-a-development-branch enforces clean-tree and non-self-merge safeguards"
+else
+    fail "finishing-a-development-branch missing clean-tree/non-self-merge safeguards"
 fi
 
 echo ""

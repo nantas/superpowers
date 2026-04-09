@@ -76,6 +76,14 @@ run_case "Test 6: subagent-driven-development-tiering" \
     "lightweight|moderate
 self-check|one reviewer|single reviewer"
 
+run_case "Test 7: finishing-branch-dirty-non-worktree" \
+    "finishing-a-development-branch" \
+    "$PROMPTS_DIR/finishing-branch-dirty-non-worktree.txt" \
+    "git status --porcelain
+git branch --show-current
+Do not proceed with uncommitted changes|checkpoint commit|commit first
+<base-branch> == <feature-branch>|different base branch|invalid.*merge target"
+
 echo "=== Summary ==="
 printf '%s\n' "${RESULTS[@]}"
 echo ""
