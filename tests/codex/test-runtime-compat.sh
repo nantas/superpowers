@@ -226,6 +226,25 @@ if ! grep -qi "worktree-exempt" "$WRITING_PLANS_FILE" "$EXECUTING_PLANS_FILE" "$
     fail "plan workflow skills missing worktree exemption guidance"
 fi
 
+WORKTREE_BASE_METADATA_PATTERNS=(
+    "branch.<feature-branch>.x-base"
+    "Base branch metadata"
+)
+
+MISSING=0
+for pattern in "${WORKTREE_BASE_METADATA_PATTERNS[@]}"; do
+    if ! grep -qi "$pattern" "$USING_GIT_WORKTREES_FILE"; then
+        echo "    missing worktree base metadata pattern: $pattern"
+        MISSING=1
+    fi
+done
+
+if [ "$MISSING" -eq 0 ]; then
+    pass "using-git-worktrees persists base-branch metadata for finishing workflows"
+else
+    fail "using-git-worktrees missing base-branch metadata persistence guidance"
+fi
+
 EXECUTING_WORKSPACE_PATTERNS=(
     "worktree-exempt=false"
     "REQUIRED SUB-SKILL"
@@ -307,8 +326,12 @@ echo "Test 1d: Finishing base-branch detection guidance..."
 FINISHING_BRANCH_FILE="$REPO_ROOT/skills/finishing-a-development-branch/SKILL.md"
 
 BASE_BRANCH_PATTERNS=(
+    "branch.<feature-branch>.x-base"
     "branch: Created from"
+    "HEAD branch"
+    "attached worktree"
     "Do not assume main/master"
+    "candidates disagree"
     "ask the user to confirm base branch"
 )
 
@@ -326,10 +349,20 @@ else
     fail "finishing-a-development-branch missing base-branch detection guidance"
 fi
 
+if grep -qi "reflog show --format=%gs --reverse" "$FINISHING_BRANCH_FILE"; then
+    fail "finishing-a-development-branch still uses incompatible reflog --reverse command"
+else
+    pass "finishing-a-development-branch avoids reflog --reverse incompatibility"
+fi
+
 FINISHING_HYGIENE_PATTERNS=(
     "git status --porcelain"
     "Do not proceed with uncommitted changes"
     "<base-branch> == <feature-branch>"
+    "git -C <other-worktree-path> status --porcelain"
+    "dirty in another worktree"
+    "Do not use blanket .*git reset"
+    "Print base-branch evidence"
     "Only cleanup for Options 1 and 4"
 )
 

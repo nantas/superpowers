@@ -81,7 +81,7 @@ run_case "Test 7: finishing-branch-dirty-non-worktree" \
     "$PROMPTS_DIR/finishing-branch-dirty-non-worktree.txt" \
     "git status --porcelain
 git branch --show-current
-Do not proceed with uncommitted changes|checkpoint commit|commit first
+Do not proceed with uncommitted changes|checkpoint commit|commit first|must be committed first|uncommitted changes must be committed first
 <base-branch> == <feature-branch>|different base branch|invalid.*merge target"
 
 echo "=== Summary ==="

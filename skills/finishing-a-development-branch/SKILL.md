@@ -55,6 +55,8 @@ git commit -m "<type>: <summary>"
 
 Do not proceed with uncommitted changes.
 
+If the user already indicates `<base-branch> == <feature-branch>`, explicitly call it an invalid merge target in the first response and require a different base branch, even while you are blocked on dirty-tree cleanup.
+
 ### Step 3: Capture Feature Branch and Workspace Context
 
 ```bash
@@ -72,23 +74,57 @@ Record:
 
 If `feature-branch` is empty, stop and ask user for branch context before proceeding.
 
-### Step 4: Determine Base Branch
-
-```bash
-# Prefer the branch this worktree was created from (reflog entry)
-git reflog show --format=%gs --reverse <feature-branch> | rg -m1 "branch: Created from " | sed 's/branch: Created from //'
-```
+### Step 4: Determine Base Branch (Multi-Signal, Conflict-Safe)
 
 Do not assume main/master.
-If the reflog lookup is empty, try default remote branch:
+Resolve `<base-branch>` from explicit evidence, in this order:
+
+1. Persisted metadata from worktree creation (`branch.<feature-branch>.x-base`)
+2. Reflog hint (`branch: Created from ...`)
+3. Active branch from other attached worktree(s)
+4. Remote default branch (`HEAD branch`)
+
+Collect signals:
 
 ```bash
+feature=$(git branch --show-current)
+
+# 1) Persisted metadata (preferred when present)
+git config --get "branch.$feature.x-base"
+
+# 2) Reflog hint (compatible with reflog walk)
+git reflog show --format='%gs' "$feature" \
+  | sed -n 's/^branch: Created from //p' \
+  | tail -n1
+
+# 3) Other attached worktree branches (excluding current path)
+current_path=$(pwd)
+git worktree list --porcelain | awk -v cur="$current_path" '
+  $1=="worktree"{path=$2}
+  $1=="branch"{br=$2; sub("^refs/heads/","",br); if(path!=cur) print br}
+'
+
+# 4) Remote default branch (prefer remote show; symbolic-ref fallback)
+git remote show origin | sed -n 's/^[[:space:]]*HEAD branch: //p'
 git symbolic-ref --quiet --short refs/remotes/origin/HEAD | sed 's@^origin/@@'
 ```
 
-If both checks are empty, ask the user to confirm base branch before proceeding.
-If the user confirms main/master, use that.
+Normalize candidates before choosing:
+- Drop empty values.
+- Drop `HEAD`.
+- Drop values equal to `<feature-branch>`.
+- Convert `refs/remotes/origin/<name>` to `<name>`.
 
+Decision rule:
+- If exactly one normalized candidate remains, use it.
+- If multiple candidates remain and all agree, use that value.
+- If candidates disagree, stop and ask user to confirm base branch before presenting options.
+- If no candidate remains, ask the user to confirm base branch before proceeding.
+
+Before Step 5, print one evidence line:
+`Base-branch evidence: x-base=<...>; reflog=<...>; attached-worktree=<...>; remote-head=<...>; selected=<...>`
+
+If the user confirms main/master, use that.
 If `<base-branch> == <feature-branch>`, treat merge target as invalid and ask for a different base branch (or use Option 2/3 instead of local merge).
 
 ### Step 5: Present Options
@@ -111,6 +147,19 @@ Which option?
 ### Step 6: Execute Choice
 
 #### Option 1: Merge Locally
+
+Before merging, check whether `<base-branch>` is active in any other worktree and whether that worktree is dirty:
+
+```bash
+git worktree list --porcelain
+git -C <other-worktree-path> status --porcelain
+```
+
+If another worktree has `<base-branch>` checked out and is dirty, block and ask the user to choose:
+- A. Clean/commit that worktree first, then continue merge
+- B. Continue with explicit acknowledgment that the other worktree will require post-merge sync
+
+Do not use blanket `git reset` as recovery in this state.
 
 ```bash
 # Switch to base branch
@@ -227,6 +276,18 @@ If no dedicated worktree exists, report non-worktree branch workflow and skip cl
 - **Problem:** Invalid self-merge target causes branch confusion
 - **Fix:** Treat `<base-branch> == <feature-branch>` as invalid and require a different base
 
+**Over-trusting `origin/HEAD`**
+- **Problem:** Stale/default remote metadata can pick wrong integration branch
+- **Fix:** Resolve from multi-signal evidence (`x-base`, reflog, attached worktree, remote head) and require confirmation on mismatch
+
+**Merging while base branch is dirty in another worktree**
+- **Problem:** Branch ref moves while another workspace stays on stale dirty snapshot
+- **Fix:** Add explicit occupancy + dirty-state gate before merge; continue only with user acknowledgment
+
+**Using blanket `git reset` for recovery**
+- **Problem:** Resets index but can hide root cause and leave worktree inconsistent
+- **Fix:** Prefer path-scoped `git restore`/targeted cleanup after status assessment
+
 **No confirmation for discard**
 - **Problem:** Accidentally delete work
 - **Fix:** Require typed "discard" confirmation
@@ -236,13 +297,17 @@ If no dedicated worktree exists, report non-worktree branch workflow and skip cl
 **Never:**
 - Proceed with failing tests
 - Proceed with uncommitted changes
+- Proceed when base-branch candidates disagree without user confirmation
+- Merge into a branch that is dirty in another worktree without explicit user acknowledgment
 - Merge without verifying tests on result
 - Delete work without confirmation
+- Use blanket `git reset` as first recovery action for worktree inconsistency
 - Force-push without explicit request
 
 **Always:**
 - Verify tests before offering options
 - Ensure `git status --porcelain` is clean before branch integration
+- Print base-branch evidence before presenting options
 - Present exactly 4 options
 - Get typed confirmation for Option 4
 - Clean up worktree for Options 1 & 4 only
