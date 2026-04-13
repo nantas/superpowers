@@ -51,27 +51,24 @@ if [ ! -f "$WRITING_PLANS_FILE" ] || [ ! -f "$EXECUTING_PLANS_FILE" ]; then
     exit 1
 fi
 
-echo "Test 1: writing-plans defines post-write authenticity audit and anti-fake checks..."
+echo "Test 1: writing-plans keeps semantic checks without a mandatory subagent audit gate..."
 require_patterns "$WRITING_PLANS_FILE" \
-    "writing-plans includes traceability, audit, and anti-placeholder rules" \
+    "writing-plans includes traceability, optional quality checks, and anti-placeholder rules" \
     "Design Traceability Matrix" \
-    "Plan Authenticity Audit" \
-    "Plan Audit Verdict" \
-    "approval_decision" \
-    "P0" \
-    "P1" \
-    "P2" \
+    "Plan Quality Check" \
+    "Optional, Non-Blocking" \
+    "Do not require an independent subagent review as a hard gate for handoff" \
     "assert no placeholder path" \
     "assert live mode has tool evidence" \
     "assert freeze requires non-empty confirmed_chain.steps"
 
 echo ""
-echo "Test 2: executing-plans enforces verdict gate before execution..."
+echo "Test 2: executing-plans enforces required plan structure without verdict hard gate..."
 require_patterns "$EXECUTING_PLANS_FILE" \
-    "executing-plans blocks execution when audit verdict is missing or not pass" \
+    "executing-plans blocks execution when required planning gates are missing" \
     "Design Traceability Matrix" \
-    "Plan Audit Verdict" \
-    "approval_decision" \
+    "Task blocks define executable steps and verification commands" \
+    "If any required gate is missing" \
     "blocked"
 
 echo ""

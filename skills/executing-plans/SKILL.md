@@ -30,9 +30,8 @@ If preflight cache is absent, stop and invoke using-superpowers first.
 5. Read plan file.
 6. Validate required planning gates before execution:
    - `Design Traceability Matrix` exists.
-   - `Plan Audit Verdict` exists at the end of the plan.
-   - `approval_decision` exists and equals `pass`.
-7. If any required gate is missing or `approval_decision != pass`: mark plan `blocked`, report the exact missing gate, and stop for plan correction.
+   - Task blocks define executable steps and verification commands.
+7. If any required gate is missing: mark plan `blocked`, report the exact missing gate, and stop for plan correction.
 8. Review critically - identify any additional questions or concerns about the plan.
 9. If concerns: Raise them with your human partner before starting.
 10. If no concerns: initialize `track_tasks` and proceed.
@@ -106,8 +105,6 @@ After all tasks complete and verified:
 - Hit a blocker mid-batch (missing dependency, test fails, instruction unclear)
 - Plan has critical gaps preventing starting
 - `Design Traceability Matrix` is missing
-- `Plan Audit Verdict` is missing
-- `approval_decision` is not `pass`
 - You don't understand an instruction
 - Verification fails repeatedly
 - A human verification gate is reached and user validation is required

@@ -147,54 +147,20 @@ git commit -m "feat: add specific feature"
 - Reference relevant skills with @ syntax
 - DRY, YAGNI, TDD, frequent commits
 
-## Plan Authenticity Audit (Required, Post-Write)
+## Plan Quality Check (Optional, Non-Blocking)
 
-After the plan file is written, and before any execution handoff, run an independent review subagent audit.
+After writing the plan, run a quick self-check before execution handoff.
 
-Use runtime adapter actions from `../_shared/runtime-compat.md`:
-1. `spawn_worker` a read-only reviewer for the plan (no file edits allowed for the worker).
-2. Reviewer checks whether the plan can truly satisfy design/requirement semantics, not just structure.
-3. `wait_worker` for reviewer completion (completion source of truth).
-4. `close_worker` when finished.
+Recommended checks:
+- Critical clauses in `Design Traceability Matrix` map to concrete tasks and executable verification commands.
+- Negative tests/assertions are present for anti-fake scenarios.
+- Commands have expected outcomes and artifact evidence fields are specific (not placeholders).
 
-Audit rubric (required):
-- Design Coverage: critical clauses have task + command + evidence + failure signal mapping.
-- Authenticity: no fake live-mode semantics without tool evidence.
-- Placeholder Leakage: key artifacts reject placeholder values.
-- Semantic Closure: checks verify real closure, not only field presence.
-- Negative Tests: critical paths include anti-fake negative cases.
-
-Severity model:
-- `P0`: critical mismatch; execution handoff is blocked.
-- `P1`: major risk; must be fixed or explicitly accepted as risk in the verdict.
-- `P2`: improvement suggestion; does not block by itself.
-
-Pass condition for handoff:
-- zero `P0`;
-- every `P1` is marked `fixed` or `accepted`.
-
-Append this block to the end of the same plan file:
-
-```markdown
-## Plan Audit Verdict
-audit_scope: [design doc sections / requirements covered]
-finding_summary: P0=<n>, P1=<n>, P2=<n>
-critical_mismatches:
-- [P0 item or `none`]
-major_risks:
-- [P1 item + status: fixed|accepted]
-anti_placeholder_checks:
-- [check + result]
-authenticity_checks:
-- [check + result]
-approval_decision: pass|blocked
-```
-
-If `approval_decision` is `blocked`, revise plan and rerun audit until it is `pass`.
+Do not require an independent subagent review as a hard gate for handoff.
 
 ## Execution Handoff
 
-After saving the plan and recording a passing `Plan Audit Verdict`, offer execution choice:
+After saving the plan, offer execution choice:
 
 **"Plan complete and saved to `docs/plans/<filename>.md`. Two execution options:**
 

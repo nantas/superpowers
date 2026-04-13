@@ -96,6 +96,7 @@ A good prompt is:
 - no constraints on touched files
 - no required output format
 - assuming "parallel" always means "faster"
+- using parallel workers as a mandatory single-plan audit gate
 - treating one wait-any result as completion for the whole wave
 - leaving timed-out workers hanging instead of falling back
 
