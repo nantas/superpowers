@@ -147,20 +147,50 @@ git commit -m "feat: add specific feature"
 - Reference relevant skills with @ syntax
 - DRY, YAGNI, TDD, frequent commits
 
-## Plan Quality Check (Optional, Non-Blocking)
+## Semantic Audit Gate (Required, Blocking)
 
-After writing the plan, run a quick self-check before execution handoff.
+After writing the plan, run a prompt-based semantic audit before execution handoff.
 
-Recommended checks:
-- Critical clauses in `Design Traceability Matrix` map to concrete tasks and executable verification commands.
-- Negative tests/assertions are present for anti-fake scenarios.
-- Commands have expected outcomes and artifact evidence fields are specific (not placeholders).
+Audit method (required):
+- Use a two-pass prompt review in the same session:
+  - Pass 1 (`Planner`): defend why each critical clause is covered by executable semantic checks.
+  - Pass 2 (`Adversarial Auditor`): try to break the plan by finding fake-compliance paths.
+- Treat the second pass as authoritative for blocking decisions.
 
-Do not require an independent subagent review as a hard gate for handoff.
+Audit rules (required):
+- Every `critical` design clause must have semantic verification, not structure-only checks.
+- For `artifact generation` clauses, define explicit `must_write_files` (for example include `proposal.md` when required).
+- Do not accept "path list returned" as equivalent to files being written.
+- Manual evidence files (for example hand-written JSON) may supplement evidence, but must never be the sole evidence source.
+- If any `P0` exists, handoff is blocked until the plan is corrected and re-audited.
+
+Append this block to the end of the same plan file:
+
+```markdown
+## Semantic Audit Verdict
+audit_scope: [design doc sections / requirements covered]
+finding_summary: P0=<n>, P1=<n>, P2=<n>
+critical_mismatches:
+- [P0 item or `none`]
+major_risks:
+- [P1 item + status: fixed|accepted]
+design_coverage_checks:
+- [DC-ID + semantic check + result]
+artifact_generation_checks:
+- [DC-ID + must_write_files + anti-path-list check + result]
+evidence_integrity_checks:
+- [manual evidence not sole evidence + result]
+authenticity_checks:
+- [anti-placeholder / live evidence / semantic closure checks + result]
+approval_decision: pass|blocked
+```
+
+Handoff requirement:
+- Execution handoff is allowed only when `approval_decision: pass`.
 
 ## Execution Handoff
 
-After saving the plan, offer execution choice:
+After saving the plan and recording a passing `Semantic Audit Verdict`, offer execution choice:
 
 **"Plan complete and saved to `docs/plans/<filename>.md`. Two execution options:**
 

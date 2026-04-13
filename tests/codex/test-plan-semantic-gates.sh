@@ -51,24 +51,31 @@ if [ ! -f "$WRITING_PLANS_FILE" ] || [ ! -f "$EXECUTING_PLANS_FILE" ]; then
     exit 1
 fi
 
-echo "Test 1: writing-plans keeps semantic checks without a mandatory subagent audit gate..."
+echo "Test 1: writing-plans enforces blocking semantic audit gate..."
 require_patterns "$WRITING_PLANS_FILE" \
-    "writing-plans includes traceability, optional quality checks, and anti-placeholder rules" \
+    "writing-plans includes traceability and blocking semantic audit rules" \
     "Design Traceability Matrix" \
-    "Plan Quality Check" \
-    "Optional, Non-Blocking" \
-    "Do not require an independent subagent review as a hard gate for handoff" \
+    "Semantic Audit Gate" \
+    "Required, Blocking" \
+    "Semantic Audit Verdict" \
+    "approval_decision: pass|blocked" \
+    "artifact generation" \
+    "must_write_files" \
+    "Do not accept \"path list returned\" as equivalent to files being written" \
     "assert no placeholder path" \
     "assert live mode has tool evidence" \
     "assert freeze requires non-empty confirmed_chain.steps"
 
 echo ""
-echo "Test 2: executing-plans enforces required plan structure without verdict hard gate..."
+echo "Test 2: executing-plans enforces semantic verdict hard gate..."
 require_patterns "$EXECUTING_PLANS_FILE" \
-    "executing-plans blocks execution when required planning gates are missing" \
+    "executing-plans blocks execution when required planning gates or semantic review fail" \
     "Design Traceability Matrix" \
+    "Semantic Audit Verdict" \
+    "approval_decision" \
     "Task blocks define executable steps and verification commands" \
-    "If any required gate is missing" \
+    "semantic red-line checks" \
+    "If any required gate is missing or semantic review fails" \
     "blocked"
 
 echo ""

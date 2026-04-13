@@ -31,10 +31,16 @@ If preflight cache is absent, stop and invoke using-superpowers first.
 6. Validate required planning gates before execution:
    - `Design Traceability Matrix` exists.
    - Task blocks define executable steps and verification commands.
-7. If any required gate is missing: mark plan `blocked`, report the exact missing gate, and stop for plan correction.
-8. Review critically - identify any additional questions or concerns about the plan.
-9. If concerns: Raise them with your human partner before starting.
-10. If no concerns: initialize `track_tasks` and proceed.
+   - `Semantic Audit Verdict` exists.
+   - `approval_decision` exists and equals `pass`.
+7. Perform semantic gate review before execution:
+   - confirm every `critical` clause has semantic verification (not structure-only checks),
+   - confirm `artifact generation` clauses include explicit required files and write verification,
+   - confirm manual evidence files are not the only evidence source.
+8. If any required gate is missing or semantic review fails: mark plan `blocked`, report exact failing gate/reason, and stop for plan correction.
+9. Review critically - identify any additional questions or concerns about the plan.
+10. If concerns: Raise them with your human partner before starting.
+11. If no concerns: initialize `track_tasks` and proceed.
 
 ### Step 2: Build Runtime Batches
 
@@ -50,8 +56,13 @@ For each task in the active batch:
 1. Mark as in_progress
 2. Follow each step exactly (plan has bite-sized steps)
 3. Run verifications as specified
-4. Update top-of-plan status ledger entry (`Task | Status | Facts`)
-5. Mark task as completed or blocked
+4. Apply semantic red-line checks (block immediately if triggered):
+   - required artifact is not actually written (only path list/status returned),
+   - required file set is incomplete (for example missing `proposal.md` in required six-pack),
+   - evidence is manual-only without executable/runtime evidence,
+   - critical modules are not wired together despite design clause requiring integration.
+5. Update top-of-plan status ledger entry (`Task | Status | Facts`)
+6. Mark task as completed or blocked
 
 Status ledger rules:
 - Keep one row per task in the top section.
@@ -105,6 +116,9 @@ After all tasks complete and verified:
 - Hit a blocker mid-batch (missing dependency, test fails, instruction unclear)
 - Plan has critical gaps preventing starting
 - `Design Traceability Matrix` is missing
+- `Semantic Audit Verdict` is missing
+- `approval_decision` is not `pass`
+- semantic red-line violation is detected
 - You don't understand an instruction
 - Verification fails repeatedly
 - A human verification gate is reached and user validation is required
